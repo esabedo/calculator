@@ -50,4 +50,11 @@ if(BUILD_TESTS)
     
     include(GoogleTest)
     gtest_discover_tests(calc_tests)
+    
+    # Custom target to run tests as part of the default build
+    add_custom_target(run_tests ALL
+        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+        DEPENDS calc_tests
+        COMMENT "Running tests"
+    )
 endif()
