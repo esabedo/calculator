@@ -1,54 +1,48 @@
 # Calculator
 
-A command-line calculator that evaluates mathematical expressions with support for arithmetic operations, functions, and parentheses.
+A console calculator written in C++17 that supports complex expressions with parentheses and mathematical functions.
 
 ## Features
 
-- **Arithmetic operations**: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), power (`^`)
+- **Basic arithmetic operations**: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), power (`^`)
+- **Parentheses**: support for nested expressions with proper precedence
 - **Mathematical functions**: `sin`, `cos`, `tan`, `log`, `exp`, `sqrt`
-- **Parentheses** for grouping expressions
-- **Unary operators**: unary plus (`+`) and unary minus (`-`)
-- **Decimal numbers** support
-- **Whitespace handling**: spaces are ignored
-- **Operator precedence**: power is right-associative, others follow standard precedence
-- **Error handling**: clear error messages for syntax errors, division by zero, unknown functions
+- **Unary operators**: positive (`+`) and negative (`-`) signs
+- **Decimal numbers**: support for floating-point numbers
+- **Error handling**: clear error messages for invalid expressions, division by zero, mismatched parentheses
 
 ## Usage
 
-### Command-line arguments
+### Command Line Arguments
 
 ```bash
+# Calculate expression from command line argument
 ./calc "2 + 3 * 4"
-./calc "sin(pi/2)"
-./calc "sqrt(16) + log(10)"
-./calc --help    # Show help message
-./calc -h        # Show help message
+./calc "sin(1.57079632679)"
+./calc "(10 - 5) / (2 + 3)"
+
+# Show help
+./calc --help
+./calc -h
+
+# Read from stdin
+echo "3 + 4 * 2" | ./calc
 ```
 
-### Standard input
-
-```bash
-echo "2 + 3 * 4" | ./calc
-./calc           # Then type expression and press Enter
-```
-
-## Examples
+### Examples
 
 ```bash
 $ ./calc "2 + 3 * 4"
 14
 
-$ ./calc "(2 + 3) * 4"
-20
-
-$ ./calc "2 ^ 3 ^ 2"
-512
-
 $ ./calc "sin(1.57079632679)"
 1
 
-$ ./calc "sqrt(16) + log(2.71828182846)"
-3
+$ ./calc "sqrt(16) + 5"
+9
+
+$ ./calc "2 ^ 3 ^ 2"
+512
 ```
 
 ## Building
@@ -57,64 +51,61 @@ $ ./calc "sqrt(16) + log(2.71828182846)"
 
 - CMake 3.12 or higher
 - C++17 compatible compiler
-- Google Test (automatically fetched if not found)
+- Google Test (automatically downloaded if not found)
 
-### Build steps
+### Build Instructions
 
 ```bash
-# Create build directory
 mkdir build
 cd build
-
-# Configure with tests enabled (default)
 cmake ..
-
-# Build (this will also build and run tests)
 make
-
-# Or use CMake directly
-cmake --build .
 ```
 
-### Build options
+### Running Tests
 
-- `BUILD_TESTS` - Build tests (default: ON)
+Tests are built and run automatically during the build process:
 
 ```bash
-cmake -DBUILD_TESTS=OFF ..  # Disable tests
-cmake -DBUILD_TESTS=ON ..   # Enable tests (default)
+cmake ..
+make
 ```
-
-## Running Tests
-
-Tests are automatically built and run when using `make` or `cmake --build .`.
 
 To run tests manually:
 
 ```bash
-cd build
 ./calc_tests
 ```
 
-Or using CTest:
+## Architecture
 
-```bash
-cd build
-ctest
-```
+The calculator consists of three main components:
+
+1. **Lexer** (`src/lexer.cpp`): Tokenizes the input string into tokens (numbers, operators, functions, parentheses)
+2. **Parser** (`src/parser.cpp`): Parses tokens into an Abstract Syntax Tree (AST) using recursive descent with operator precedence
+3. **Evaluator** (`src/evaluator.cpp`): Evaluates the AST and returns the result
+
+### AST Nodes
+
+- `NumberNode`: Represents numeric literals
+- `BinaryOpNode`: Binary operations (+, -, *, /, ^)
+- `UnaryOpNode`: Unary operations (+, -)
+- `FunctionNode`: Function calls (sin, cos, etc.)
 
 ## Project Structure
 
 ```
-.
-├── CMakeLists.txt          # CMake configuration
+calculator/
+├── CMakeLists.txt          # Build configuration
+├── README.md               # This file
+├── .gitignore              # Git ignore rules
 ├── src/
-│   ├── main.cpp            # CLI entry point
-│   ├── lexer.cpp/hpp       # Tokenizer
-│   ├── parser.cpp/hpp      # Expression parser (AST builder)
-│   ├── evaluator.cpp/hpp   # AST evaluator
-│   ├── error.hpp           # Exception types
-│   └── ast/                # AST node types
+│   ├── main.cpp            # Entry point
+│   ├── lexer.cpp/hpp       # Lexical analyzer
+│   ├── parser.cpp/hpp      # Syntax parser
+│   ├── evaluator.cpp/hpp   # Expression evaluator
+│   ├── error.hpp           # Error handling
+│   └── ast/                # AST node definitions
 │       ├── node.hpp
 │       ├── number.hpp
 │       ├── binary_op.hpp
@@ -124,12 +115,6 @@ ctest
     └── test_calculator.cpp # Unit tests
 ```
 
-## Architecture
+## License
 
-The calculator uses a three-stage pipeline:
-
-1. **Lexer** - Converts input string into tokens (numbers, operators, functions, parentheses)
-2. **Parser** - Builds an Abstract Syntax Tree (AST) from tokens using recursive descent
-3. **Evaluator** - Traverses the AST and computes the result
-
-This design allows for clean separation of concerns and easy extensibility.
+MIT License
