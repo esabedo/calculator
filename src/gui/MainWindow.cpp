@@ -70,13 +70,21 @@ void MainWindow::onToggleTheme() {
 void MainWindow::loadStyleSheet(const QString& theme) {
     QString fileName = (theme == "dark") ? "styles_dark.qss" : "styles_light.qss";
     
-    QFile file(fileName);
+    // Пытаемся найти стили рядом с исполняемым файлом
+    QString path = QCoreApplication::applicationDirPath() + "/" + fileName;
+    
+    QFile file(path);
+    if (!file.exists()) {
+        // Если запускаем из корня проекта во время разработки
+        file.setFileName(fileName);
+    }
+    
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         QString styleSheet = QString::fromUtf8(file.readAll());
         file.close();
         qApp->setStyleSheet(styleSheet);
     } else {
-        qDebug() << "Не удалось загрузить файл стилей:" << fileName;
+        qDebug() << "Не удалось загрузить файл стилей:" << path;
     }
 }
 

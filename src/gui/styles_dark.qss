@@ -1,345 +1,174 @@
-/* Темная тема в стиле Discord */
+/* Темная тема в стиле Windows Calculator (Windows 11) */
 
 /* Общие стили */
 QWidget {
-    background-color: #313338;
-    color: #dbdee1;
-    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    background-color: #202020;
+    color: #ffffff;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     font-size: 11pt;
 }
 
 QMainWindow {
-    background-color: #2b2d31;
+    background-color: #202020;
 }
 
-/* Меню */
-QMenuBar {
-    background-color: #313338;
-    color: #dbdee1;
-    border-bottom: 1px solid #1e1f22;
-}
-
-QMenuBar::item {
-    background-color: transparent;
-    padding: 5px 10px;
-}
-
-QMenuBar::item:selected {
-    background-color: #404249;
-}
-
-QMenu {
-    background-color: #313338;
-    color: #dbdee1;
-    border: 1px solid #1e1f22;
-}
-
-QMenu::item:selected {
-    background-color: #404249;
-}
-
-/* Дисплей калькулятора */
-QLineEdit {
-    background-color: #383a40;
-    color: #ffffff;
-    border: 2px solid #1e1f22;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 18pt;
-    font-weight: bold;
-}
-
-QLineEdit:focus {
-    border: 2px solid #5865f2;
-}
-
-/* Кнопка переключения инженерного режима */
-QPushButton:!property(buttonType) {
-    background-color: #4752c4;
-    color: #ffffff;
-    border: 1px solid #3c45a5;
-    border-radius: 5px;
-    padding: 8px;
-    font-size: 11pt;
-    font-weight: bold;
-}
-
-QPushButton:!property(buttonType):hover {
-    background-color: #5865f2;
-    border: 1px solid #4752c4;
-}
-
-QPushButton:!property(buttonType):pressed {
-    background-color: #3c45a5;
-}
-
-QPushButton:!property(buttonType):checked {
-    background-color: #5865f2;
-    border: 1px solid #4752c4;
-}
-
-/* История */
-QGroupBox {
-    background-color: #313338;
-    border: 2px solid #1e1f22;
-    border-radius: 5px;
-    margin-top: 10px;
-    padding-top: 10px;
-    font-weight: bold;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 5px 10px;
-    color: #dbdee1;
-}
-
-QListWidget {
-    background-color: #2b2d31;
-    color: #b5bac1;
-    border: 1px solid #1e1f22;
-    border-radius: 3px;
-    padding: 5px;
-}
-
-QListWidget::item {
-    padding: 5px;
-    border-bottom: 1px solid #1e1f22;
-}
-
-QListWidget::item:hover {
-    background-color: #404249;
-}
-
-/* Базовые стили кнопок */
-QPushButton {
-    background-color: #383a40;
-    color: #dbdee1;
-    border: 1px solid #1e1f22;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 12pt;
-    font-weight: bold;
-    min-width: 60px;
-    min-height: 50px;
-}
-
-QPushButton:hover {
-    background-color: #404249;
-    border: 1px solid #313338;
-}
-
-QPushButton:pressed {
-    background-color: #2b2d31;
-}
-
-/* Кнопки цифр */
-QPushButton[buttonType="digit"] {
-    background-color: #383a40;
-    color: #dbdee1;
-}
-
-QPushButton[buttonType="digit"]:hover {
-    background-color: #404249;
-}
-
-QPushButton[buttonType="digit"]:pressed {
-    background-color: #2b2d31;
-}
-
-/* Кнопки операторов */
-QPushButton[buttonType="operator"] {
-    background-color: #5865f2;
-    color: #ffffff;
-}
-
-QPushButton[buttonType="operator"]:hover {
-    background-color: #4752c4;
-}
-
-QPushButton[buttonType="operator"]:pressed {
-    background-color: #3c45a5;
-}
-
-/* Кнопки функций */
-QPushButton[buttonType="function"] {
-    background-color: #3ba55d;
-    color: #ffffff;
-}
-
-QPushButton[buttonType="function"]:hover {
-    background-color: #2d7d46;
-}
-
-QPushButton[buttonType="function"]:pressed {
-    background-color: #1e5b33;
-}
-
-/* Кнопки констант */
-QPushButton[buttonType="constant"] {
-    background-color: #9b59b6;
-    color: #ffffff;
-}
-
-QPushButton[buttonType="constant"]:hover {
-    background-color: #8e44ad;
-}
-
-QPushButton[buttonType="constant"]:pressed {
-    background-color: #71368a;
-}
-
-/* Специальные кнопки */
-QPushButton[buttonType="special"] {
-    background-color: #ed4245;
-    color: #ffffff;
-}
-
-QPushButton[buttonType="special"]:hover {
-    background-color: #c03537;
-}
-
-QPushButton[buttonType="special"]:pressed {
-    background-color: #a12d2f;
-}
-
-/* Кнопки скобок */
-QPushButton[buttonType="bracket"] {
-    background-color: #faa61a;
-    color: #ffffff;
-}
-
-QPushButton[buttonType="bracket"]:hover {
-    background-color: #df8f17;
-}
-
-QPushButton[buttonType="bracket"]:pressed {
-    background-color: #c27c15;
-}
-
-/* Скроллбары */
-QScrollBar:vertical {
-    background-color: #2b2d31;
-    width: 12px;
-    border-radius: 6px;
-}
-
-QScrollBar::handle:vertical {
-    background-color: #1e1f22;
-    border-radius: 6px;
-    min-height: 20px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background-color: #404249;
-}
-
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    height: 0px;
-}
-
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none;
-}
-
-/* === Новые стили для Windows UI === */
-
-/* Заголовок калькулятора */
+/* Заголовок и меню */
+/* Стилизация заголовка окна */
 #calculatorHeader {
-    background-color: #2b2d31;
-    border-bottom: 1px solid #1e1f22;
+    background-color: #202020;
 }
 
-/* Кнопка hamburger menu */
+#modeTitle {
+    color: #ffffff;
+    font-size: 15pt;
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+/* Кнопка меню (Hamburger) */
 #menuButton {
     background-color: transparent;
-    color: #dbdee1;
     border: none;
-    border-radius: 5px;
+    color: #ffffff;
+    font-size: 16pt;
 }
 
 #menuButton:hover {
-    background-color: #383a40;
+    background-color: #3a3a3a;
+    border-radius: 4px;
 }
 
 #menuButton:pressed {
-    background-color: #313338;
+    background-color: #303030;
 }
 
-/* Заголовок режима */
-#modeTitle {
-    color: #dbdee1;
-}
-
-/* Всплывающее меню */
-#modeMenu {
-    background-color: #2b2d31;
-    border-right: 1px solid #1e1f22;
-}
-
-#menuHeader {
-    background-color: #313338;
-    color: #dbdee1;
-    border-bottom: 1px solid #1e1f22;
-}
-
-#menuSeparator {
-    background-color: #1e1f22;
-}
-
-#modeButton {
-    background-color: transparent;
-    color: #dbdee1;
-    border: none;
-    border-radius: 0;
-    text-align: left;
-    padding-left: 20px;
-}
-
-#modeButton:hover {
-    background-color: #383a40;
-}
-
-#modeButton:checked {
-    background-color: #404249;
-    border-left: 3px solid #5865f2;
-}
-
-/* Переключатель систем счисления */
-#baseButton {
-    background-color: #383a40;
-    color: #dbdee1;
-    border: 1px solid #1e1f22;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-#baseButton:hover {
-    background-color: #404249;
-}
-
-#baseButton:checked {
-    background-color: #5865f2;
+/* Дисплей */
+QLineEdit {
+    background-color: #202020; /* Прозрачный фон, сливается с окном */
     color: #ffffff;
-    border: 1px solid #4752c4;
+    border: none;
+    padding: 0px 10px 10px 0px; 
+    font-size: 32pt;
+    font-weight: bold;
+    selection-background-color: #0078d4;
 }
 
-/* Панель отображения систем счисления */
+/* Панели систем счисления (Программистский режим) */
 #baseDisplays {
-    background-color: #2b2d31;
-    border: 1px solid #1e1f22;
-    border-radius: 5px;
+    background-color: #202020;
 }
 
 #baseDisplay {
-    color: #b5bac1;
-    padding: 2px 5px;
+    color: #cccccc;
+    font-family: "Consolas", monospace;
+    font-size: 10pt;
+    padding: 2px;
 }
 
-/* Отключенные кнопки */
-QPushButton:disabled {
-    background-color: #2b2d31;
-    color: #4f545c;
-    border: 1px solid #1e1f22;
+/* Кнопки переключения систем счисления (HEX, DEC, OCT, BIN) */
+#baseButton {
+    background-color: transparent;
+    color: #cccccc;
+    border: none;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 10px;
+    border-left: 3px solid transparent;
+}
+
+#baseButton:hover {
+    background-color: #323232;
+}
+
+#baseButton:checked {
+    color: #76b9ed; /* Акцентный цвет для активной системы */
+    border-left: 3px solid #76b9ed;
+    background-color: #2d2d2d;
+}
+
+/* Общий стиль всех кнопок калькулятора */
+QPushButton {
+    background-color: #323232;
+    color: #ffffff;
+    border: 1px solid #202020; /* Тонкая граница в цвет фона, чтобы был отступ */
+    border-radius: 4px;
+    font-size: 14pt;
+    font-weight: normal;
+}
+
+QPushButton:hover {
+    background-color: #3b3b3b;
+}
+
+QPushButton:pressed {
+    background-color: #2a2a2a;
+}
+
+/* Кнопки цифр (0-9, A-F) - чуть светлее или такие же */
+QPushButton[buttonType="digit"] {
+    background-color: #3b3b3b; /* Чуть светлее для основных цифр */
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+QPushButton[buttonType="digit"]:hover {
+    background-color: #454545;
+}
+
+QPushButton[buttonType="digit"]:pressed {
+    background-color: #323232;
+}
+
+/* Кнопки операторов (+, -, *, /) */
+QPushButton[buttonType="operator"] {
+    background-color: #323232;
+    font-size: 16pt;
+}
+
+/* Кнопка "Равно" (=) - акцентная */
+QPushButton[text="="] {
+    background-color: #76b9ed; /* Голубой акцент */
+    color: #000000; /* Черный текст на светлом фоне */
+    border: 1px solid #76b9ed;
+}
+
+QPushButton[text="="]:hover {
+    background-color: #8accff; /* Светлее при наведении */
+}
+
+QPushButton[text="="]:pressed {
+    background-color: #5da0d3; /* Темнее при нажатии */
+}
+
+/* Кнопки C, CE, Backspace */
+QPushButton[text="C"], QPushButton[text="CE"], QPushButton[text="⌫"] {
+    background-color: #323232;
+}
+
+/* Всплывающее меню режимов */
+#modeMenu {
+    background-color: #2d2d2d;
+    border-right: 1px solid #1f1f1f;
+}
+
+#modeMenu QPushButton {
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    padding-left: 15px;
+    font-size: 12pt;
+    height: 40px;
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+#modeMenu QPushButton:hover {
+    background-color: #3a3a3a;
+}
+
+#modeMenu QPushButton:checked {
+    background-color: #3a3a3a;
+    border-left: 3px solid #76b9ed;
+    color: #ffffff;
+    font-weight: bold;
 }
