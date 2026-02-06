@@ -57,8 +57,20 @@ Token Lexer::parseIdentifier() {
         return Token(TokenType::Number, 2.71828182845904523536);
     }
     
+    // Проверка на битовые операции
+    if (id == "AND") {
+        return Token(TokenType::BitwiseAnd);
+    } else if (id == "OR") {
+        return Token(TokenType::BitwiseOr);
+    } else if (id == "XOR") {
+        return Token(TokenType::BitwiseXor);
+    } else if (id == "NOT") {
+        return Token(TokenType::BitwiseNot);
+    }
+    
     return Token(TokenType::Identifier, id);
 }
+
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -113,6 +125,24 @@ std::vector<Token> Lexer::tokenize() {
             case ',':
                 get();
                 tokens.emplace_back(TokenType::Comma);
+                break;
+            case '<':
+                get();
+                if (peek() == '<') {
+                    get();
+                    tokens.emplace_back(TokenType::LeftShift);
+                } else {
+                    throw ParseError("Unexpected character: <");
+                }
+                break;
+            case '>':
+                get();
+                if (peek() == '>') {
+                    get();
+                    tokens.emplace_back(TokenType::RightShift);
+                } else {
+                    throw ParseError("Unexpected character: >");
+                }
                 break;
             default:
                 if (std::isdigit(static_cast<unsigned char>(c))) {

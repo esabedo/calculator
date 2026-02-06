@@ -2,17 +2,19 @@
 
 #include <QWidget>
 #include <QLineEdit>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QListWidget>
+#include <QStackedWidget>
 #include <QPushButton>
-#include <QString>
-#include "CalculatorButton.hpp"
+#include <QLabel>
+#include "CalculatorMode.hpp"
+#include "ModeMenu.hpp"
+#include "StandardModeWidget.hpp"
+#include "ScientificModeWidget.hpp"
+#include "ProgrammerModeWidget.hpp"
 
 namespace calc {
 
 /**
- * @brief Главный виджет калькулятора с базовой и инженерной панелями
+ * @brief Главный виджет калькулятора в стиле Windows
  */
 class CalculatorWidget : public QWidget {
     Q_OBJECT
@@ -21,24 +23,27 @@ public:
     explicit CalculatorWidget(QWidget* parent = nullptr);
 
 private slots:
-    void onButtonClicked();
-    void onClearClicked();
-    void onClearEntryClicked();
-    void onBackspaceClicked();
-    void onEqualsClicked();
-    void onToggleEngineering();
+    void onModeChanged(CalculatorMode mode);
+    void onMenuButtonClicked();
+    void onEvaluateRequested();
 
 private:
     void setupUI();
-    void createBasicButtons();
-    void createEngineeringButtons();
-    void evaluateExpression();
+    void evaluateExpression(const QString& expression);
+    QString getModeTitle(CalculatorMode mode) const;
     
-    QLineEdit* display_;
-    QListWidget* history_;
-    QWidget* engineeringPanel_;
-    QPushButton* toggleEngineeringButton_;
-    bool isEngineeringMode_;
+    // UI компоненты
+    QPushButton* menuButton_;
+    QLabel* modeTitle_;
+    ModeMenu* modeMenu_;
+    QStackedWidget* modeStack_;
+    
+    // Виджеты режимов
+    StandardModeWidget* standardWidget_;
+    ScientificModeWidget* scientificWidget_;
+    ProgrammerModeWidget* programmerWidget_;
+    
+    CalculatorMode currentMode_;
 };
 
 } // namespace calc

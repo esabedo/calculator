@@ -48,12 +48,23 @@ if(BUILD_GUI)
             src/gui/MainWindow.cpp
             src/gui/CalculatorWidget.cpp
             src/gui/CalculatorButton.cpp
+            src/gui/ModeMenu.cpp
+            src/gui/StandardModeWidget.cpp
+            src/gui/ScientificModeWidget.cpp
+            src/gui/ProgrammerModeWidget.cpp
+            src/gui/NumberConverter.cpp
         )
         
         set(GUI_HEADERS
             src/gui/MainWindow.hpp
             src/gui/CalculatorWidget.hpp
             src/gui/CalculatorButton.hpp
+            src/gui/CalculatorMode.hpp
+            src/gui/ModeMenu.hpp
+            src/gui/StandardModeWidget.hpp
+            src/gui/ScientificModeWidget.hpp
+            src/gui/ProgrammerModeWidget.hpp
+            src/gui/NumberConverter.hpp
         )
         
         # GUI executable
@@ -68,10 +79,15 @@ if(BUILD_GUI)
         target_include_directories(calc-gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
         target_link_libraries(calc-gui Qt5::Widgets)
         
-        # Copy styles.qss to build directory
+        # Copy style files to build directory
         configure_file(
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/styles.qss
-            ${CMAKE_CURRENT_BINARY_DIR}/styles.qss
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/styles_dark.qss
+            ${CMAKE_CURRENT_BINARY_DIR}/styles_dark.qss
+            COPYONLY
+        )
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/styles_light.qss
+            ${CMAKE_CURRENT_BINARY_DIR}/styles_light.qss
             COPYONLY
         )
     else()
@@ -119,7 +135,8 @@ add_custom_target(clean-all
     COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc
     COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc-gui
     COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc_tests
-    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/styles.qss
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/styles_dark.qss
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/styles_light.qss
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Cleaning all build files..."
 )

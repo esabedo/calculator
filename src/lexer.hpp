@@ -20,8 +20,16 @@ enum class TokenType {
     LParen,
     RParen,
     Comma,
+    // Битовые операции
+    BitwiseAnd,    // AND
+    BitwiseOr,     // OR
+    BitwiseXor,    // XOR
+    BitwiseNot,    // NOT
+    LeftShift,     // <<
+    RightShift,    // >>
     End
 };
+
 
 struct Token {
     TokenType type;

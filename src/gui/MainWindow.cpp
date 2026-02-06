@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QApplication>
+#include <QDebug>
 
 namespace calc {
 
@@ -67,142 +68,17 @@ void MainWindow::onToggleTheme() {
 }
 
 void MainWindow::loadStyleSheet(const QString& theme) {
-    QString styleSheet;
+    QString fileName = (theme == "dark") ? "styles_dark.qss" : "styles_light.qss";
     
-    if (theme == "dark") {
-        // Темная тема Discord
-        QFile file("styles.qss");
-        if (file.open(QFile::ReadOnly | QFile::Text)) {
-            styleSheet = QString::fromUtf8(file.readAll());
-            file.close();
-        }
+    QFile file(fileName);
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        QString styleSheet = QString::fromUtf8(file.readAll());
+        file.close();
+        qApp->setStyleSheet(styleSheet);
     } else {
-        // Светлая тема
-        styleSheet = R"(
-            QWidget {
-                background-color: #ffffff;
-                color: #2e3338;
-                font-family: "Segoe UI", Arial, sans-serif;
-                font-size: 11pt;
-            }
-            QMainWindow {
-                background-color: #f2f3f5;
-            }
-            QMenuBar {
-                background-color: #ffffff;
-                color: #2e3338;
-                border-bottom: 1px solid #e3e5e8;
-            }
-            QMenuBar::item:selected {
-                background-color: #e3e5e8;
-            }
-            QMenu {
-                background-color: #ffffff;
-                color: #2e3338;
-                border: 1px solid #e3e5e8;
-            }
-            QMenu::item:selected {
-                background-color: #e3e5e8;
-            }
-            QLineEdit {
-                background-color: #f2f3f5;
-                color: #2e3338;
-                border: 2px solid: #e3e5e8;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 18pt;
-                font-weight: bold;
-            }
-            QLineEdit:focus {
-                border: 2px solid #5865f2;
-            }
-            QPushButton:!property(buttonType) {
-                background-color: #5865f2;
-                color: #ffffff;
-                border: 1px solid #4752c4;
-                border-radius: 5px;
-                padding: 8px;
-                font-size: 11pt;
-                font-weight: bold;
-            }
-            QPushButton:!property(buttonType):hover {
-                background-color: #4752c4;
-            }
-            QGroupBox {
-                background-color: #ffffff;
-                border: 2px solid #e3e5e8;
-                border-radius: 5px;
-                margin-top: 10px;
-                padding-top: 10px;
-                font-weight: bold;
-            }
-            QListWidget {
-                background-color: #f2f3f5;
-                color: #2e3338;
-                border: 1px solid #e3e5e8;
-                border-radius: 3px;
-                padding: 5px;
-            }
-            QListWidget::item:hover {
-                background-color: #e3e5e8;
-            }
-            QPushButton {
-                background-color: #e3e5e8;
-                color: #2e3338;
-                border: 1px solid #d1d4d8;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 12pt;
-                font-weight: bold;
-                min-width: 60px;
-                min-height: 50px;
-            }
-            QPushButton:hover {
-                background-color: #d1d4d8;
-            }
-            QPushButton[buttonType="digit"] {
-                background-color: #e3e5e8;
-                color: #2e3338;
-            }
-            QPushButton[buttonType="operator"] {
-                background-color: #5865f2;
-                color: #ffffff;
-            }
-            QPushButton[buttonType="operator"]:hover {
-                background-color: #4752c4;
-            }
-            QPushButton[buttonType="function"] {
-                background-color: #3ba55d;
-                color: #ffffff;
-            }
-            QPushButton[buttonType="function"]:hover {
-                background-color: #2d7d46;
-            }
-            QPushButton[buttonType="constant"] {
-                background-color: #9b59b6;
-                color: #ffffff;
-            }
-            QPushButton[buttonType="constant"]:hover {
-                background-color: #8e44ad;
-            }
-            QPushButton[buttonType="special"] {
-                background-color: #ed4245;
-                color: #ffffff;
-            }
-            QPushButton[buttonType="special"]:hover {
-                background-color: #c03537;
-            }
-            QPushButton[buttonType="bracket"] {
-                background-color: #faa61a;
-                color: #ffffff;
-            }
-            QPushButton[buttonType="bracket"]:hover {
-                background-color: #df8f17;
-            }
-        )";
+        qDebug() << "Не удалось загрузить файл стилей:" << fileName;
     }
-    
-    qApp->setStyleSheet(styleSheet);
 }
+
 
 } // namespace calc
