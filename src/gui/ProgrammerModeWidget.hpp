@@ -6,6 +6,7 @@
 #include <QButtonGroup>
 #include <QPushButton>
 #include <QLabel>
+#include <QKeyEvent>
 #include "NumberConverter.hpp"
 #include "CalculatorButton.hpp"
 
@@ -19,6 +20,11 @@ class ProgrammerModeWidget : public QWidget {
 
 public:
     explicit ProgrammerModeWidget(QWidget* parent = nullptr);
+    
+    /**
+     * @brief Обработка нажатий клавиш
+     */
+    void keyPressEvent(QKeyEvent* event) override;
     
     /**
      * @brief Получить дисплей

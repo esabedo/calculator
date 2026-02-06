@@ -2,6 +2,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QButtonGroup>
+#include <QApplication>
+#include <QKeyEvent>
 
 namespace calc {
 
@@ -225,6 +227,7 @@ void ProgrammerModeWidget::onButtonClicked() {
     
     QString value = btn->value();
     display_->setText(display_->text() + value);
+    display_->setFocus();
 }
 
 void ProgrammerModeWidget::onClearClicked() {
@@ -305,6 +308,22 @@ void ProgrammerModeWidget::onDisplayTextChanged(const QString& text) {
     } catch (...) {
         // Игнорируем ошибки (это может быть незаконченное выражение)
     }
+}
+
+void ProgrammerModeWidget::keyPressEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        onEqualsClicked();
+        return;
+    }
+    
+    // Если фокус не на дисплее, перенаправляем ввод в дисплей
+    if (display_ && !display_->hasFocus()) {
+        display_->setFocus();
+        QApplication::sendEvent(display_, event);
+        return;
+    }
+    
+    QWidget::keyPressEvent(event);
 }
 
 } // namespace calc
