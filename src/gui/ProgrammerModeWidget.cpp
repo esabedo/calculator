@@ -42,7 +42,8 @@ void ProgrammerModeWidget::setupUI() {
     baseDisplaysLayout->setContentsMargins(5, 5, 5, 5);
     
     QFont smallFont;
-    smallFont.setPointSize(10);
+    smallFont.setPointSize(13);
+    smallFont.setBold(true);
     
     hexDisplay_ = new QLabel("HEX: 0", this);
     hexDisplay_->setFont(smallFont);

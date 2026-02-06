@@ -61,8 +61,18 @@ QLineEdit {
 #baseDisplay {
     color: #cccccc;
     font-family: "Consolas", monospace;
-    font-size: 10pt;
+    font-size: 13pt;
+    font-weight: bold;
     padding: 2px;
+}
+
+/* ... */
+
+/* Стили для отключенных кнопок */
+QPushButton:disabled {
+    background-color: #202020; /* Цвет фона окна, как будто кнопки "нет" */
+    color: #505050; /* Очень тусклый текст */
+    border: 1px solid #202020;
 }
 
 /* Кнопки переключения систем счисления (HEX, DEC, OCT, BIN) */
