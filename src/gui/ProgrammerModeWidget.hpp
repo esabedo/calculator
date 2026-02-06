@@ -39,6 +39,7 @@ private slots:
     void onBackspaceClicked();
     void onEqualsClicked();
     void onBaseChanged(NumberBase base);
+    void onDisplayTextChanged(const QString& text);
 
 private:
     void setupUI();

@@ -212,7 +212,8 @@ std::unique_ptr<Node> Parser::parsePrimary() {
         
         if (match(TokenType::LParen)) {
             auto arg = parseExpression();
-            if (!match(TokenType::RParen)) {
+            // Разрешаем опускать закрывающую скобку, если достигнут конец ввода
+            if (!match(TokenType::RParen) && current().type != TokenType::End) {
                 throw ParseError("Expected ')' after function argument");
             }
             return std::make_unique<FuncCallNode>(name, std::move(arg));
@@ -223,7 +224,8 @@ std::unique_ptr<Node> Parser::parsePrimary() {
     
     if (match(TokenType::LParen)) {
         auto expr = parseExpression();
-        if (!match(TokenType::RParen)) {
+        // Разрешаем опускать закрывающую скобку, если достигнут конец ввода
+        if (!match(TokenType::RParen) && current().type != TokenType::End) {
             throw ParseError("Expected ')'");
         }
         return expr;

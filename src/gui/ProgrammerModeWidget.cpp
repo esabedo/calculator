@@ -27,6 +27,9 @@ void ProgrammerModeWidget::setupUI() {
     displayFont.setPointSize(32);
     displayFont.setBold(true);
     display_->setFont(displayFont);
+    display_->setReadOnly(false); // Разрешить ввод с клавиатуры
+    connect(display_, &QLineEdit::textChanged, this, &ProgrammerModeWidget::onDisplayTextChanged);
+    connect(display_, &QLineEdit::returnPressed, this, &ProgrammerModeWidget::onEqualsClicked);
     mainLayout->addWidget(display_);
     
     // Панель отображения в разных системах
@@ -283,6 +286,24 @@ void ProgrammerModeWidget::updateButtonStates() {
         }
         
         btn->setEnabled(enabled);
+    }
+}
+
+void ProgrammerModeWidget::onDisplayTextChanged(const QString& text) {
+    if (text.isEmpty()) {
+        currentValue_ = 0;
+        updateBaseDisplays();
+        return;
+    }
+    
+    // Пытаемся распарсить текст как число в текущей системе
+    // Если это выражение (например "5+5"), парсинг не удастся, 
+    // и мы просто не обновляем панели до вычисления
+    try {
+        currentValue_ = NumberConverter::fromString(text, currentBase_);
+        updateBaseDisplays();
+    } catch (...) {
+        // Игнорируем ошибки (это может быть незаконченное выражение)
     }
 }
 
