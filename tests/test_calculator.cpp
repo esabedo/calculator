@@ -126,9 +126,17 @@ TEST(CalculatorTest, InvalidExpression) {
     EXPECT_THROW(evaluate_expression("2 + * 3"), ParseError);
 }
 
+TEST(CalculatorTest, ImplicitClosingParentheses) {
+    // Теперь это валидно (автозакрытие скобок)
+    EXPECT_DOUBLE_EQ(evaluate_expression("(2 + 3"), 5.0);
+    EXPECT_NEAR(evaluate_expression("sin(0"), 0.0, 1e-10);
+}
+
 TEST(CalculatorTest, MismatchedParentheses) {
-    EXPECT_THROW(evaluate_expression("(2 + 3"), ParseError);
+    // Лишняя закрывающая скобка всё ещё ошибка
     EXPECT_THROW(evaluate_expression("2 + 3)"), ParseError);
+    // Несоответствие скобок в середине выражения
+    EXPECT_THROW(evaluate_expression("(2 + 3))"), ParseError); 
 }
 
 TEST(CalculatorTest, UnknownFunction) {
