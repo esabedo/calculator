@@ -101,10 +101,26 @@ if(BUILD_TESTS)
     include(GoogleTest)
     gtest_discover_tests(calc_tests)
     
-    # Custom target to run tests as part of the default build
-    add_custom_target(run_tests ALL
-        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-        DEPENDS calc_tests
-        COMMENT "Running tests"
-    )
+    # Автоматический запуск тестов после сборки
+add_custom_target(run_tests ALL
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    DEPENDS calc_tests
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running tests..."
+)
+
+# Команда для полной очистки сборки
+add_custom_target(clean-all
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/CMakeFiles
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/Testing
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/cmake_install.cmake
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/Makefile
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc-gui
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/calc_tests
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/styles.qss
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Cleaning all build files..."
+)
 endif()
