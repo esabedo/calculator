@@ -1,59 +1,119 @@
-# Calculator
+# Инженерный калькулятор
 
-A console calculator written in C++17 that supports complex expressions with parentheses and mathematical functions.
+Полнофункциональный инженерный калькулятор с графическим интерфейсом на Qt5 и консольным режимом, написанный на C++17.
 
-## Features
+## Возможности
 
-- **Basic arithmetic operations**: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), power (`^`)
-- **Parentheses**: support for nested expressions with proper precedence
-- **Mathematical functions**: `sin`, `cos`, `tan`, `log`, `exp`, `sqrt`
-- **Unary operators**: positive (`+`) and negative (`-`) signs
-- **Decimal numbers**: support for floating-point numbers
-- **Error handling**: clear error messages for invalid expressions, division by zero, mismatched parentheses
+### Базовые операции
+- **Арифметические операции**: сложение (`+`), вычитание (`-`), умножение (`*`), деление (`/`), степень (`^`), модуль (`%`)
+- **Скобки**: поддержка вложенных выражений с правильным приоритетом операций
+- **Унарные операторы**: положительный (`+`) и отрицательный (`-`) знаки
+- **Десятичные числа**: поддержка чисел с плавающей точкой
 
-## Usage
+### Тригонометрические функции
+- Прямые: `sin`, `cos`, `tan`
+- Обратные: `asin`, `acos`, `atan`
+- Гиперболические: `sinh`, `cosh`, `tanh`
 
-### Command Line Arguments
+### Логарифмические функции
+- `log` / `ln` - натуральный логарифм (основание e)
+- `log10` - десятичный логарифм (основание 10)
+- `exp` - экспонента (e^x)
+
+### Дополнительные функции
+- `sqrt` - квадратный корень
+- `abs` - абсолютное значение
+- `ceil` - округление вверх
+- `floor` - округление вниз
+- `round` - округление до ближайшего целого
+- `factorial` - факториал (только для целых неотрицательных чисел)
+
+### Математические константы
+- `pi` / `PI` - число π (3.14159...)
+- `e` / `E` - число e (2.71828...)
+
+### Обработка ошибок
+- Деление на ноль
+- Некорректные выражения
+- Несовпадающие скобки
+- Неизвестные функции
+- Недопустимые аргументы функций (например, sqrt(-1))
+
+## Использование
+
+### GUI версия
+
+Запустите графическое приложение:
 
 ```bash
-# Calculate expression from command line argument
+./calc-gui
+```
+
+**Возможности GUI:**
+- Интуитивный интерфейс с кнопками для всех функций
+- Дисплей для отображения выражений и результатов
+- История вычислений (до 50 последних операций)
+- Переключение между темной и светлой темой (Ctrl+T)
+- Цветовое кодирование кнопок по типам:
+  - Синие - операторы
+  - Зеленые - функции
+  - Фиолетовые - константы
+  - Оранжевые - специальные (=, C, CE, ⌫)
+  - Желтые - скобки
+
+### Консольная версия
+
+#### Аргументы командной строки
+
+```bash
+# Вычислить выражение из аргумента командной строки
 ./calc "2 + 3 * 4"
-./calc "sin(1.57079632679)"
+./calc "sin(pi/2)"
 ./calc "(10 - 5) / (2 + 3)"
 
-# Show help
+# Показать справку
 ./calc --help
 ./calc -h
 
-# Read from stdin
+# Читать из stdin
 echo "3 + 4 * 2" | ./calc
 ```
 
-### Examples
+#### Примеры
 
 ```bash
 $ ./calc "2 + 3 * 4"
 14
 
-$ ./calc "sin(1.57079632679)"
+$ ./calc "sin(pi/2)"
 1
 
-$ ./calc "sqrt(16) + 5"
-9
+$ ./calc "log10(100)"
+2
 
-$ ./calc "2 ^ 3 ^ 2"
-512
+$ ./calc "factorial(5)"
+120
+
+$ ./calc "10 % 3"
+1
+
+$ ./calc "e ^ 2"
+7.38906
+
+$ ./calc "sqrt(16) + abs(-5)"
+9
 ```
 
-## Building
+## Сборка
 
-### Requirements
+### Требования
 
-- CMake 3.12 or higher
-- C++17 compatible compiler
-- Google Test (automatically downloaded if not found)
+- CMake 3.12 или выше
+- Компилятор с поддержкой C++17 (GCC 7+, Clang 5+, MSVC 2017+)
+- Qt5 Widgets (опционально, для GUI версии)
+- Google Test (автоматически загружается, если не найден)
 
-### Build Instructions
+### Инструкции по сборке
 
 ```bash
 mkdir build
@@ -62,59 +122,78 @@ cmake ..
 make
 ```
 
-### Running Tests
+Это создаст:
+- `calc` - консольная версия
+- `calc-gui` - GUI версия (если Qt5 найден)
+- `calc_tests` - unit-тесты
 
-Tests are built and run automatically during the build process:
+### Сборка без GUI
+
+Если вы хотите собрать только консольную версию:
 
 ```bash
-cmake ..
+cmake -DBUILD_GUI=OFF ..
 make
 ```
 
-To run tests manually:
+### Запуск тестов
+
+Тесты запускаются автоматически при сборке. Для ручного запуска:
 
 ```bash
 ./calc_tests
 ```
 
-## Architecture
+## Архитектура
 
-The calculator consists of three main components:
+Калькулятор состоит из трех основных компонентов:
 
-1. **Lexer** (`src/lexer.cpp`): Tokenizes the input string into tokens (numbers, operators, functions, parentheses)
-2. **Parser** (`src/parser.cpp`): Parses tokens into an Abstract Syntax Tree (AST) using recursive descent with operator precedence
-3. **Evaluator** (`src/evaluator.cpp`): Evaluates the AST and returns the result
+1. **Lexer** (`src/lexer.cpp`): Токенизирует входную строку в токены (числа, операторы, функции, скобки, константы)
+2. **Parser** (`src/parser.cpp`): Парсит токены в абстрактное синтаксическое дерево (AST) используя рекурсивный спуск с приоритетом операторов
+3. **Evaluator** (`src/evaluator.cpp`): Вычисляет AST и возвращает результат
 
-### AST Nodes
+### Узлы AST
 
-- `NumberNode`: Represents numeric literals
-- `BinaryOpNode`: Binary operations (+, -, *, /, ^)
-- `UnaryOpNode`: Unary operations (+, -)
-- `FunctionNode`: Function calls (sin, cos, etc.)
+- `NumberNode`: Представляет числовые литералы и константы
+- `BinaryOpNode`: Бинарные операции (+, -, *, /, %, ^)
+- `UnaryOpNode`: Унарные операции (+, -)
+- `FuncCallNode`: Вызовы функций (sin, cos, log, и т.д.)
 
-## Project Structure
+### GUI компоненты
+
+- `MainWindow`: Главное окно приложения с меню
+- `CalculatorWidget`: Основной виджет калькулятора с дисплеем, кнопками и историей
+- `CalculatorButton`: Кастомная кнопка с типизацией и стилями
+
+## Структура проекта
 
 ```
 calculator/
-├── CMakeLists.txt          # Build configuration
-├── README.md               # This file
-├── .gitignore              # Git ignore rules
+├── CMakeLists.txt          # Конфигурация сборки
+├── README.md               # Этот файл
+├── .gitignore              # Правила игнорирования Git
 ├── src/
-│   ├── main.cpp            # Entry point
-│   ├── lexer.cpp/hpp       # Lexical analyzer
-│   ├── parser.cpp/hpp      # Syntax parser
-│   ├── evaluator.cpp/hpp   # Expression evaluator
-│   ├── error.hpp           # Error handling
-│   └── ast/                # AST node definitions
-│       ├── node.hpp
-│       ├── number.hpp
-│       ├── binary_op.hpp
-│       ├── unary_op.hpp
-│       └── func_call.hpp
+│   ├── main.cpp            # Точка входа консольной версии
+│   ├── main_gui.cpp        # Точка входа GUI версии
+│   ├── lexer.cpp/hpp       # Лексический анализатор
+│   ├── parser.cpp/hpp      # Синтаксический парсер
+│   ├── evaluator.cpp/hpp   # Вычислитель выражений
+│   ├── error.hpp           # Обработка ошибок
+│   ├── ast/                # Определения узлов AST
+│   │   ├── node.hpp
+│   │   ├── number.hpp
+│   │   ├── binary_op.hpp
+│   │   ├── unary_op.hpp
+│   │   └── func_call.hpp
+│   └── gui/                # GUI компоненты
+│       ├── MainWindow.cpp/hpp
+│       ├── CalculatorWidget.cpp/hpp
+│       ├── CalculatorButton.cpp/hpp
+│       └── styles.qss      # Таблица стилей Qt
 └── tests/
-    └── test_calculator.cpp # Unit tests
+    └── test_calculator.cpp # Unit-тесты
 ```
 
-## License
+## Лицензия
 
 MIT License
