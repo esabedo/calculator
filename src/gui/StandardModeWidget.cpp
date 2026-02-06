@@ -40,11 +40,12 @@ void StandardModeWidget::setupUI() {
     display_->setFont(displayFont);
     
     // Валидатор для разрешения только математических символов
-    QRegularExpression rx("[0-9+\\-*/%^().,eE\\sA-Za-z]+");
+    QRegularExpression rx("[0-9+\\-*/%^().,eE\\s]+");
     display_->setValidator(new QRegularExpressionValidator(rx, this));
     
     connect(display_, &QLineEdit::textChanged, this, &StandardModeWidget::onDisplayTextChanged);
     connect(display_, &QLineEdit::returnPressed, this, &StandardModeWidget::onEqualsClicked);
+
     
     displayLayout->addWidget(display_);
     
@@ -153,7 +154,7 @@ void StandardModeWidget::createButtons() {
     gridLayout->addWidget(dotBtn, 5, 2);
     gridLayout->addWidget(equalBtn, 5, 3);
     
-    connect(negateBtn, &QPushButton::clicked, this, &StandardModeWidget::onButtonClicked);
+    connect(negateBtn, &QPushButton::clicked, this, &StandardModeWidget::onNegateClicked);
     connect(zeroBtn, &QPushButton::clicked, this, &StandardModeWidget::onButtonClicked);
     connect(dotBtn, &QPushButton::clicked, this, &StandardModeWidget::onButtonClicked);
     connect(equalBtn, &QPushButton::clicked, this, &StandardModeWidget::onEqualsClicked);
@@ -231,11 +232,83 @@ void StandardModeWidget::calculatePreview(const QString& text) {
         ss << std::defaultfloat << result;
         previewLabel_->setText(QString::fromStdString(ss.str()));
     } catch (...) {
-        // Если ошибка парсинга или вычисления, просто не показываем превью
-        // или очищаем его, если оно было
-        // previewLabel_->clear(); // Можно не очищать, чтобы видеть последний валидный результат, но калькулятор Windows очищает или не показывает
         previewLabel_->clear();
     }
+}
+
+void StandardModeWidget::onNegateClicked() {
+    QString text = display_->text();
+    if (text.isEmpty()) return;
+    
+    // Ищем последнее число, пропуская пробелы
+    int i = text.length() - 1;
+    while (i >= 0 && text[i].isSpace()) i--;
+    
+    // Если в конце оператор или скобка '(', то добавляем "-".
+    if (i < 0) { display_->setText(text + "-"); return; }
+    
+    QChar c = text[i];
+    if (QString("+-*/%^(").contains(c)) {
+        // Проверяем, не стоит ли уже минус?
+        if (c == '-') {
+            // Если перед минусом оператор или начало строки, то удаляем его
+            int opPos = i; // позиция минуса
+            int prevPos = opPos - 1;
+            while (prevPos >= 0 && text[prevPos].isSpace()) prevPos--;
+            
+            bool isUnary = false;
+            if (prevPos < 0) isUnary = true;
+            else if (QString("+-*/%^(").contains(text[prevPos])) isUnary = true;
+            
+            if (isUnary) {
+                text.remove(opPos, 1);
+                display_->setText(text);
+                return;
+            }
+        }
+        // Иначе вставляем минус
+        text.insert(i + 1, "-");
+        display_->setText(text);
+        return;
+    }
+    
+    if (c == ')') {
+        // С выражениями в скобках сложно, оставим как есть или просто добавим " * -1"
+        // Для простоты, пока ничего не делаем или (опционально) добавляем "* -1"
+        return; 
+    }
+    
+    // Значит это цифра или точка (или e). Ищем начало числа.
+    int end = i;
+    int start = end;
+    while (start >= 0 && (text[start].isDigit() || text[start] == '.' || text[start] == 'e' || text[start] == 'E')) {
+        start--;
+    }
+    start++; 
+    
+    // Проверяем префикс
+    int prefixPos = start - 1;
+    while (prefixPos >= 0 && text[prefixPos].isSpace()) prefixPos--;
+    
+    if (prefixPos >= 0 && text[prefixPos] == '-') {
+         // Проверяем на унарность минуса
+         int prevOpPos = prefixPos - 1;
+         while (prevOpPos >= 0 && text[prevOpPos].isSpace()) prevOpPos--;
+         
+         bool isUnary = false;
+         if (prevOpPos < 0) isUnary = true;
+         else if (QString("+-*/%^(").contains(text[prevOpPos])) isUnary = true;
+         
+         if (isUnary) {
+             text.remove(prefixPos, 1);
+             display_->setText(text);
+             return;
+         }
+    }
+    
+    // Вставляем минус перед числом
+    text.insert(start, "-");
+    display_->setText(text);
 }
 
 void StandardModeWidget::keyPressEvent(QKeyEvent* event) {

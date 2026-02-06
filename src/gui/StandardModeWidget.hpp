@@ -37,6 +37,7 @@ protected slots:
     void onClearEntryClicked();
     void onBackspaceClicked();
     void onEqualsClicked();
+    void onNegateClicked();
     void onDisplayTextChanged(const QString& text);
 
 protected:

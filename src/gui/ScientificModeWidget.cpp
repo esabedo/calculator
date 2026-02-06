@@ -1,6 +1,7 @@
 #include "ScientificModeWidget.hpp"
 #include <QVBoxLayout>
 #include <QGridLayout>
+#include <QRegularExpressionValidator>
 
 namespace calc {
 
@@ -20,6 +21,10 @@ ScientificModeWidget::ScientificModeWidget(QWidget* parent)
     mainLayout->insertWidget(1, scientificPanel_);
     
     createScientificButtons();
+    
+    // Переопределить валидатор для научных функций (разрешить буквы)
+    QRegularExpression rx("[0-9+\\-*/%^().,eE\\sA-Za-z]+");
+    display_->setValidator(new QRegularExpressionValidator(rx, this));
 }
 
 void ScientificModeWidget::createScientificButtons() {
