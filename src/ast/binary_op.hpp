@@ -13,7 +13,13 @@ enum class BinaryOp {
     Multiply,
     Divide,
     Modulo,
-    Power
+    Power,
+    // Битовые операции
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    LeftShift,
+    RightShift
 };
 
 class BinaryOpNode : public Node {
@@ -44,6 +50,17 @@ public:
                 return std::fmod(left_val, right_val);
             case BinaryOp::Power:
                 return std::pow(left_val, right_val);
+            // Битовые операции
+            case BinaryOp::BitwiseAnd:
+                return static_cast<double>(static_cast<int64_t>(left_val) & static_cast<int64_t>(right_val));
+            case BinaryOp::BitwiseOr:
+                return static_cast<double>(static_cast<int64_t>(left_val) | static_cast<int64_t>(right_val));
+            case BinaryOp::BitwiseXor:
+                return static_cast<double>(static_cast<int64_t>(left_val) ^ static_cast<int64_t>(right_val));
+            case BinaryOp::LeftShift:
+                return static_cast<double>(static_cast<int64_t>(left_val) << static_cast<int64_t>(right_val));
+            case BinaryOp::RightShift:
+                return static_cast<double>(static_cast<int64_t>(left_val) >> static_cast<int64_t>(right_val));
         }
         throw EvalError("Unknown binary operator");
     }

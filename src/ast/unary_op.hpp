@@ -8,8 +8,10 @@ namespace calc {
 
 enum class UnaryOp {
     Plus,
-    Minus
+    Minus,
+    BitwiseNot  // Битовое НЕ
 };
+
 
 class UnaryOpNode : public Node {
 public:
@@ -24,6 +26,8 @@ public:
                 return +val;
             case UnaryOp::Minus:
                 return -val;
+            case UnaryOp::BitwiseNot:
+                return static_cast<double>(~static_cast<int64_t>(val));
         }
         return val;
     }

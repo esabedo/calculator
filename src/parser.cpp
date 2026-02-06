@@ -63,12 +63,72 @@ std::unique_ptr<Node> Parser::parse() {
 }
 
 std::unique_ptr<Node> Parser::parseExpression() {
+    return parseBitwiseOr();
+}
+
+// Битовое ИЛИ (самый низкий приоритет)
+std::unique_ptr<Node> Parser::parseBitwiseOr() {
+    auto left = parseBitwiseXor();
+    
+    while (current().type == TokenType::BitwiseOr) {
+        advance();
+        auto right = parseBitwiseXor();
+        left = std::make_unique<BinaryOpNode>(BinaryOp::BitwiseOr, std::move(left), std::move(right));
+    }
+    
+    return left;
+}
+
+// Битовое исключающее ИЛИ
+std::unique_ptr<Node> Parser::parseBitwiseXor() {
+    auto left = parseBitwiseAnd();
+    
+    while (current().type == TokenType::BitwiseXor) {
+        advance();
+        auto right = parseBitwiseAnd();
+        left = std::make_unique<BinaryOpNode>(BinaryOp::BitwiseXor, std::move(left), std::move(right));
+    }
+    
+    return left;
+}
+
+// Битовое И
+std::unique_ptr<Node> Parser::parseBitwiseAnd() {
+    auto left = parseShift();
+    
+    while (current().type == TokenType::BitwiseAnd) {
+        advance();
+        auto right = parseShift();
+        left = std::make_unique<BinaryOpNode>(BinaryOp::BitwiseAnd, std::move(left), std::move(right));
+    }
+    
+    return left;
+}
+
+// Битовые сдвиги
+std::unique_ptr<Node> Parser::parseShift() {
     auto left = parseTerm();
+    
+    while (current().type == TokenType::LeftShift || current().type == TokenType::RightShift) {
+        TokenType op = current().type;
+        advance();
+        auto right = parseTerm();
+        
+        BinaryOp binOp = (op == TokenType::LeftShift) ? BinaryOp::LeftShift : BinaryOp::RightShift;
+        left = std::make_unique<BinaryOpNode>(binOp, std::move(left), std::move(right));
+    }
+    
+    return left;
+}
+
+// Сложение и вычитание
+std::unique_ptr<Node> Parser::parseTerm() {
+    auto left = parseFactor();
     
     while (current().type == TokenType::Plus || current().type == TokenType::Minus) {
         TokenType op = current().type;
         advance();
-        auto right = parseTerm();
+        auto right = parseFactor();
         
         BinaryOp binOp = (op == TokenType::Plus) ? BinaryOp::Add : BinaryOp::Subtract;
         left = std::make_unique<BinaryOpNode>(binOp, std::move(left), std::move(right));
@@ -77,7 +137,8 @@ std::unique_ptr<Node> Parser::parseExpression() {
     return left;
 }
 
-std::unique_ptr<Node> Parser::parseTerm() {
+// Умножение, деление, остаток
+std::unique_ptr<Node> Parser::parseFactor() {
     auto left = parsePower();
     
     while (current().type == TokenType::Multiply || 
@@ -125,6 +186,12 @@ std::unique_ptr<Node> Parser::parseUnary() {
         advance();
         auto operand = parseUnary();
         return std::make_unique<UnaryOpNode>(UnaryOp::Minus, std::move(operand));
+    }
+    
+    if (current().type == TokenType::BitwiseNot) {
+        advance();
+        auto operand = parseUnary();
+        return std::make_unique<UnaryOpNode>(UnaryOp::BitwiseNot, std::move(operand));
     }
     
     return parsePrimary();

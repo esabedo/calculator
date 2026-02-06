@@ -29,6 +29,10 @@ private:
     bool match(TokenType type);
     
     std::unique_ptr<Node> parseExpression();
+    std::unique_ptr<Node> parseBitwiseOr();
+    std::unique_ptr<Node> parseBitwiseXor();
+    std::unique_ptr<Node> parseBitwiseAnd();
+    std::unique_ptr<Node> parseShift();
     std::unique_ptr<Node> parseTerm();
     std::unique_ptr<Node> parseFactor();
     std::unique_ptr<Node> parsePower();
