@@ -53,6 +53,27 @@ QLineEdit:focus {
     border: 2px solid #0078d4;
 }
 
+/* Кнопка переключения инженерного режима */
+QPushButton:!property(buttonType) {
+    background-color: #1e5a8e;
+    color: #ffffff;
+    border: 1px solid #2d6da3;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+QPushButton:!property(buttonType):hover {
+    background-color: #2d6da3;
+    border: 1px solid #3d7db3;
+}
+
+QPushButton:!property(buttonType):checked {
+    background-color: #0078d4;
+    border: 1px solid #1084d8;
+}
+
 /* История */
 QGroupBox {
     background-color: #2b2b2b;

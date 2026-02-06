@@ -5,14 +5,14 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QListWidget>
+#include <QPushButton>
 #include <QString>
-#include <memory>
 #include "CalculatorButton.hpp"
 
 namespace calc {
 
 /**
- * @brief Главный виджет калькулятора
+ * @brief Главный виджет калькулятора с базовой и инженерной панелями
  */
 class CalculatorWidget : public QWidget {
     Q_OBJECT
@@ -22,28 +22,23 @@ public:
 
 private slots:
     void onButtonClicked();
-    void onEqualClicked();
     void onClearClicked();
     void onClearEntryClicked();
     void onBackspaceClicked();
+    void onEqualsClicked();
+    void onToggleEngineering();
 
 private:
     void setupUI();
-    void createButtons();
-    void connectSignals();
-    void addToHistory(const QString& expression, const QString& result);
-    QString evaluateExpression(const QString& expression);
+    void createBasicButtons();
+    void createEngineeringButtons();
+    void evaluateExpression();
     
-    // UI компоненты
     QLineEdit* display_;
     QListWidget* history_;
-    QGridLayout* buttonLayout_;
-    
-    // Кнопки
-    QMap<QString, CalculatorButton*> buttons_;
-    
-    // Текущее выражение
-    QString currentExpression_;
+    QWidget* engineeringPanel_;
+    QPushButton* toggleEngineeringButton_;
+    bool isEngineeringMode_;
 };
 
 } // namespace calc

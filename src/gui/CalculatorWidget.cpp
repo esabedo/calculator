@@ -9,16 +9,17 @@
 #include <QPushButton>
 #include <QFont>
 #include <QGroupBox>
+#include <QPropertyAnimation>
 #include <sstream>
 #include <iomanip>
 
 namespace calc {
 
 CalculatorWidget::CalculatorWidget(QWidget* parent)
-    : QWidget(parent) {
+    : QWidget(parent), isEngineeringMode_(false) {
     setupUI();
-    createButtons();
-    connectSignals();
+    createBasicButtons();
+    createEngineeringButtons();
 }
 
 void CalculatorWidget::setupUI() {
@@ -38,11 +39,35 @@ void CalculatorWidget::setupUI() {
     // Контейнер для кнопок и истории
     auto* contentLayout = new QHBoxLayout();
     
-    // Сетка кнопок
-    auto* buttonWidget = new QWidget(this);
-    buttonLayout_ = new QGridLayout(buttonWidget);
-    buttonLayout_->setSpacing(5);
-    contentLayout->addWidget(buttonWidget, 3);
+    // Левая панель: кнопки
+    auto* leftPanel = new QWidget(this);
+    auto* leftLayout = new QVBoxLayout(leftPanel);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
+    
+    // Кнопка переключения инженерного режима
+    toggleEngineeringButton_ = new QPushButton("Инженерный режим ▼", this);
+    toggleEngineeringButton_->setCheckable(true);
+    toggleEngineeringButton_->setMinimumHeight(35);
+    connect(toggleEngineeringButton_, &QPushButton::clicked, this, &CalculatorWidget::onToggleEngineering);
+    leftLayout->addWidget(toggleEngineeringButton_);
+    
+    // Базовая сетка кнопок
+    auto* basicWidget = new QWidget(this);
+    auto* basicLayout = new QGridLayout(basicWidget);
+    basicLayout->setSpacing(5);
+    basicLayout->setObjectName("basicLayout");
+    leftLayout->addWidget(basicWidget);
+    
+    // Инженерная панель (скрыта по умолчанию)
+    engineeringPanel_ = new QWidget(this);
+    auto* engLayout = new QGridLayout(engineeringPanel_);
+    engLayout->setSpacing(5);
+    engLayout->setObjectName("engineeringLayout");
+    engineeringPanel_->setMaximumHeight(0);
+    engineeringPanel_->setVisible(false);
+    leftLayout->addWidget(engineeringPanel_);
+    
+    contentLayout->addWidget(leftPanel, 3);
     
     // История вычислений
     auto* historyGroup = new QGroupBox("История", this);
@@ -55,55 +80,55 @@ void CalculatorWidget::setupUI() {
     mainLayout->addLayout(contentLayout);
 }
 
-void CalculatorWidget::createButtons() {
-    // Строка 0: Специальные функции
+void CalculatorWidget::createBasicButtons() {
+    auto* basicLayout = findChild<QGridLayout*>("basicLayout");
+    if (!basicLayout) return;
+    
+    // Строка 0: C, CE, ⌫, /
     auto* clearBtn = new CalculatorButton("C", CalculatorButton::ButtonType::Special, this);
     auto* ceBtn = new CalculatorButton("CE", CalculatorButton::ButtonType::Special, this);
     auto* backBtn = new CalculatorButton("⌫", CalculatorButton::ButtonType::Special, this);
     auto* divBtn = new CalculatorButton("/", CalculatorButton::ButtonType::Operator, this);
     
-    buttonLayout_->addWidget(clearBtn, 0, 0);
-    buttonLayout_->addWidget(ceBtn, 0, 1);
-    buttonLayout_->addWidget(backBtn, 0, 2);
-    buttonLayout_->addWidget(divBtn, 0, 3);
+    basicLayout->addWidget(clearBtn, 0, 0);
+    basicLayout->addWidget(ceBtn, 0, 1);
+    basicLayout->addWidget(backBtn, 0, 2);
+    basicLayout->addWidget(divBtn, 0, 3);
     
-    buttons_["C"] = clearBtn;
-    buttons_["CE"] = ceBtn;
-    buttons_["⌫"] = backBtn;
-    buttons_["/"] = divBtn;
+    connect(clearBtn, &QPushButton::clicked, this, &CalculatorWidget::onClearClicked);
+    connect(ceBtn, &QPushButton::clicked, this, &CalculatorWidget::onClearEntryClicked);
+    connect(backBtn, &QPushButton::clicked, this, &CalculatorWidget::onBackspaceClicked);
+    connect(divBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     
     // Строка 1: 7, 8, 9, *
     for (int i = 0; i < 3; ++i) {
-        QString digit = QString::number(7 + i);
-        auto* btn = new CalculatorButton(digit, CalculatorButton::ButtonType::Digit, this);
-        buttonLayout_->addWidget(btn, 1, i);
-        buttons_[digit] = btn;
+        auto* btn = new CalculatorButton(QString::number(7 + i), CalculatorButton::ButtonType::Digit, this);
+        basicLayout->addWidget(btn, 1, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     }
     auto* mulBtn = new CalculatorButton("*", CalculatorButton::ButtonType::Operator, this);
-    buttonLayout_->addWidget(mulBtn, 1, 3);
-    buttons_["*"] = mulBtn;
+    basicLayout->addWidget(mulBtn, 1, 3);
+    connect(mulBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     
     // Строка 2: 4, 5, 6, -
     for (int i = 0; i < 3; ++i) {
-        QString digit = QString::number(4 + i);
-        auto* btn = new CalculatorButton(digit, CalculatorButton::ButtonType::Digit, this);
-        buttonLayout_->addWidget(btn, 2, i);
-        buttons_[digit] = btn;
+        auto* btn = new CalculatorButton(QString::number(4 + i), CalculatorButton::ButtonType::Digit, this);
+        basicLayout->addWidget(btn, 2, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     }
     auto* subBtn = new CalculatorButton("-", CalculatorButton::ButtonType::Operator, this);
-    buttonLayout_->addWidget(subBtn, 2, 3);
-    buttons_["-"] = subBtn;
+    basicLayout->addWidget(subBtn, 2, 3);
+    connect(subBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     
     // Строка 3: 1, 2, 3, +
     for (int i = 0; i < 3; ++i) {
-        QString digit = QString::number(1 + i);
-        auto* btn = new CalculatorButton(digit, CalculatorButton::ButtonType::Digit, this);
-        buttonLayout_->addWidget(btn, 3, i);
-        buttons_[digit] = btn;
+        auto* btn = new CalculatorButton(QString::number(1 + i), CalculatorButton::ButtonType::Digit, this);
+        basicLayout->addWidget(btn, 3, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     }
     auto* addBtn = new CalculatorButton("+", CalculatorButton::ButtonType::Operator, this);
-    buttonLayout_->addWidget(addBtn, 3, 3);
-    buttons_["+"] = addBtn;
+    basicLayout->addWidget(addBtn, 3, 3);
+    connect(addBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     
     // Строка 4: 0, ., =, %
     auto* zeroBtn = new CalculatorButton("0", CalculatorButton::ButtonType::Digit, this);
@@ -111,96 +136,110 @@ void CalculatorWidget::createButtons() {
     auto* equalBtn = new CalculatorButton("=", CalculatorButton::ButtonType::Special, this);
     auto* modBtn = new CalculatorButton("%", CalculatorButton::ButtonType::Operator, this);
     
-    buttonLayout_->addWidget(zeroBtn, 4, 0);
-    buttonLayout_->addWidget(dotBtn, 4, 1);
-    buttonLayout_->addWidget(equalBtn, 4, 2);
-    buttonLayout_->addWidget(modBtn, 4, 3);
+    basicLayout->addWidget(zeroBtn, 4, 0);
+    basicLayout->addWidget(dotBtn, 4, 1);
+    basicLayout->addWidget(equalBtn, 4, 2);
+    basicLayout->addWidget(modBtn, 4, 3);
     
-    buttons_["0"] = zeroBtn;
-    buttons_["."] = dotBtn;
-    buttons_["="] = equalBtn;
-    buttons_["%"] = modBtn;
+    connect(zeroBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(dotBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(equalBtn, &QPushButton::clicked, this, &CalculatorWidget::onEqualsClicked);
+    connect(modBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     
-    // Строка 5: Скобки и степень
+    // Строка 5: (, ), ^
     auto* lparenBtn = new CalculatorButton("(", CalculatorButton::ButtonType::Bracket, this);
     auto* rparenBtn = new CalculatorButton(")", CalculatorButton::ButtonType::Bracket, this);
     auto* powBtn = new CalculatorButton("^", CalculatorButton::ButtonType::Operator, this);
     
-    buttonLayout_->addWidget(lparenBtn, 5, 0);
-    buttonLayout_->addWidget(rparenBtn, 5, 1);
-    buttonLayout_->addWidget(powBtn, 5, 2, 1, 2);
+    basicLayout->addWidget(lparenBtn, 5, 0);
+    basicLayout->addWidget(rparenBtn, 5, 1);
+    basicLayout->addWidget(powBtn, 5, 2, 1, 2);
     
-    buttons_["("] = lparenBtn;
-    buttons_[")"] = rparenBtn;
-    buttons_["^"] = powBtn;
+    connect(lparenBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(rparenBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(powBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+}
+
+void CalculatorWidget::createEngineeringButtons() {
+    auto* engLayout = findChild<QGridLayout*>("engineeringLayout");
+    if (!engLayout) return;
     
-    // Строка 6-9: Функции
-    QStringList functions = {
-        "sin", "cos", "tan", "asin",
-        "acos", "atan", "sinh", "cosh",
-        "tanh", "log", "ln", "log10",
-        "exp", "sqrt", "abs", "factorial"
-    };
-    
-    int row = 6;
-    int col = 0;
-    for (const QString& func : functions) {
-        auto* btn = new CalculatorButton(func, CalculatorButton::ButtonType::Function, this);
-        btn->setValue(func + "(");
-        buttonLayout_->addWidget(btn, row, col);
-        buttons_[func] = btn;
-        
-        col++;
-        if (col >= 4) {
-            col = 0;
-            row++;
-        }
+    // Тригонометрические функции
+    QStringList trigFuncs = {"sin", "cos", "tan", "asin", "acos", "atan"};
+    for (int i = 0; i < trigFuncs.size(); ++i) {
+        auto* btn = new CalculatorButton(trigFuncs[i], CalculatorButton::ButtonType::Function, this);
+        btn->setValue(trigFuncs[i] + "(");
+        engLayout->addWidget(btn, 0, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
     }
     
-    // Строка 10: Константы и дополнительные функции
+    // Гиперболические функции
+    QStringList hypFuncs = {"sinh", "cosh", "tanh"};
+    for (int i = 0; i < hypFuncs.size(); ++i) {
+        auto* btn = new CalculatorButton(hypFuncs[i], CalculatorButton::ButtonType::Function, this);
+        btn->setValue(hypFuncs[i] + "(");
+        engLayout->addWidget(btn, 1, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    }
+    
+    // Логарифмические функции
+    QStringList logFuncs = {"log", "ln", "log10"};
+    for (int i = 0; i < logFuncs.size(); ++i) {
+        auto* btn = new CalculatorButton(logFuncs[i], CalculatorButton::ButtonType::Function, this);
+        btn->setValue(logFuncs[i] + "(");
+        engLayout->addWidget(btn, 1, i + 3);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    }
+    
+    // Дополнительные функции
+    QStringList extraFuncs = {"exp", "sqrt", "abs", "ceil", "floor", "round"};
+    for (int i = 0; i < extraFuncs.size(); ++i) {
+        auto* btn = new CalculatorButton(extraFuncs[i], CalculatorButton::ButtonType::Function, this);
+        btn->setValue(extraFuncs[i] + "(");
+        engLayout->addWidget(btn, 2, i);
+        connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    }
+    
+    // Факториал и константы
+    auto* factBtn = new CalculatorButton("n!", CalculatorButton::ButtonType::Function, this);
+    factBtn->setValue("factorial(");
     auto* piBtn = new CalculatorButton("π", CalculatorButton::ButtonType::Constant, this);
     piBtn->setValue("pi");
     auto* eBtn = new CalculatorButton("e", CalculatorButton::ButtonType::Constant, this);
     eBtn->setValue("e");
-    auto* ceilBtn = new CalculatorButton("ceil", CalculatorButton::ButtonType::Function, this);
-    ceilBtn->setValue("ceil(");
-    auto* floorBtn = new CalculatorButton("floor", CalculatorButton::ButtonType::Function, this);
-    floorBtn->setValue("floor(");
     
-    buttonLayout_->addWidget(piBtn, 10, 0);
-    buttonLayout_->addWidget(eBtn, 10, 1);
-    buttonLayout_->addWidget(ceilBtn, 10, 2);
-    buttonLayout_->addWidget(floorBtn, 10, 3);
+    engLayout->addWidget(factBtn, 3, 0);
+    engLayout->addWidget(piBtn, 3, 1);
+    engLayout->addWidget(eBtn, 3, 2);
     
-    buttons_["π"] = piBtn;
-    buttons_["e"] = eBtn;
-    buttons_["ceil"] = ceilBtn;
-    buttons_["floor"] = floorBtn;
-    
-    // Строка 11: round
-    auto* roundBtn = new CalculatorButton("round", CalculatorButton::ButtonType::Function, this);
-    roundBtn->setValue("round(");
-    buttonLayout_->addWidget(roundBtn, 11, 0, 1, 2);
-    buttons_["round"] = roundBtn;
+    connect(factBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(piBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
+    connect(eBtn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
 }
 
-void CalculatorWidget::connectSignals() {
-    // Подключить все кнопки кроме специальных
-    for (auto it = buttons_.begin(); it != buttons_.end(); ++it) {
-        CalculatorButton* btn = it.value();
-        
-        if (btn->text() == "=") {
-            connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onEqualClicked);
-        } else if (btn->text() == "C") {
-            connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onClearClicked);
-        } else if (btn->text() == "CE") {
-            connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onClearEntryClicked);
-        } else if (btn->text() == "⌫") {
-            connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onBackspaceClicked);
-        } else {
-            connect(btn, &QPushButton::clicked, this, &CalculatorWidget::onButtonClicked);
-        }
+void CalculatorWidget::onToggleEngineering() {
+    isEngineeringMode_ = !isEngineeringMode_;
+    
+    // Анимация высоты панели
+    QPropertyAnimation* animation = new QPropertyAnimation(engineeringPanel_, "maximumHeight");
+    animation->setDuration(300);
+    animation->setEasingCurve(QEasingCurve::InOutQuad);
+    
+    if (isEngineeringMode_) {
+        engineeringPanel_->setVisible(true);
+        animation->setStartValue(0);
+        animation->setEndValue(200);
+        toggleEngineeringButton_->setText("Инженерный режим ▲");
+    } else {
+        animation->setStartValue(200);
+        animation->setEndValue(0);
+        toggleEngineeringButton_->setText("Инженерный режим ▼");
+        connect(animation, &QPropertyAnimation::finished, [this]() {
+            engineeringPanel_->setVisible(false);
+        });
     }
+    
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void CalculatorWidget::onButtonClicked() {
@@ -208,38 +247,29 @@ void CalculatorWidget::onButtonClicked() {
     if (!btn) return;
     
     QString value = btn->value();
-    currentExpression_ += value;
-    display_->setText(currentExpression_);
+    display_->setText(display_->text() + value);
 }
 
-void CalculatorWidget::onEqualClicked() {
-    if (currentExpression_.isEmpty()) return;
+void CalculatorWidget::onEqualsClicked() {
+    QString expression = display_->text();
+    if (expression.isEmpty()) return;
     
-    QString result = evaluateExpression(currentExpression_);
-    
-    if (!result.startsWith("Ошибка")) {
-        addToHistory(currentExpression_, result);
-        currentExpression_ = result;
-        display_->setText(result);
-    } else {
-        display_->setText(result);
-    }
+    evaluateExpression();
 }
 
 void CalculatorWidget::onClearClicked() {
-    currentExpression_.clear();
     display_->clear();
     display_->setPlaceholderText("0");
 }
 
 void CalculatorWidget::onClearEntryClicked() {
-    // Удалить последнее число или операцию
-    if (currentExpression_.isEmpty()) return;
+    QString text = display_->text();
+    if (text.isEmpty()) return;
     
-    // Простая реализация: удалить все до последнего оператора
+    // Удалить последнее число или операцию
     int lastOpIndex = -1;
-    for (int i = currentExpression_.length() - 1; i >= 0; --i) {
-        QChar c = currentExpression_[i];
+    for (int i = text.length() - 1; i >= 0; --i) {
+        QChar c = text[i];
         if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^' || c == '(') {
             lastOpIndex = i;
             break;
@@ -247,32 +277,23 @@ void CalculatorWidget::onClearEntryClicked() {
     }
     
     if (lastOpIndex >= 0) {
-        currentExpression_ = currentExpression_.left(lastOpIndex + 1);
+        display_->setText(text.left(lastOpIndex + 1));
     } else {
-        currentExpression_.clear();
+        display_->clear();
     }
-    
-    display_->setText(currentExpression_);
 }
 
 void CalculatorWidget::onBackspaceClicked() {
-    if (!currentExpression_.isEmpty()) {
-        currentExpression_.chop(1);
-        display_->setText(currentExpression_);
+    QString text = display_->text();
+    if (!text.isEmpty()) {
+        text.chop(1);
+        display_->setText(text);
     }
 }
 
-void CalculatorWidget::addToHistory(const QString& expression, const QString& result) {
-    QString historyItem = expression + " = " + result;
-    history_->insertItem(0, historyItem);
+void CalculatorWidget::evaluateExpression() {
+    QString expression = display_->text();
     
-    // Ограничить историю 50 элементами
-    while (history_->count() > 50) {
-        delete history_->takeItem(history_->count() - 1);
-    }
-}
-
-QString CalculatorWidget::evaluateExpression(const QString& expression) {
     try {
         std::string expr = expression.toStdString();
         
@@ -298,13 +319,24 @@ QString CalculatorWidget::evaluateExpression(const QString& expression) {
             }
         }
         
-        return QString::fromStdString(resultStr);
+        QString resultQStr = QString::fromStdString(resultStr);
+        
+        // Добавить в историю
+        QString historyItem = expression + " = " + resultQStr;
+        history_->insertItem(0, historyItem);
+        
+        // Ограничить историю 50 элементами
+        while (history_->count() > 50) {
+            delete history_->takeItem(history_->count() - 1);
+        }
+        
+        display_->setText(resultQStr);
     } catch (const ParseError& e) {
-        return QString("Ошибка: %1").arg(e.what());
+        display_->setText(QString("Ошибка: %1").arg(e.what()));
     } catch (const EvalError& e) {
-        return QString("Ошибка: %1").arg(e.what());
+        display_->setText(QString("Ошибка: %1").arg(e.what()));
     } catch (const std::exception& e) {
-        return QString("Ошибка: %1").arg(e.what());
+        display_->setText(QString("Ошибка: %1").arg(e.what()));
     }
 }
 
