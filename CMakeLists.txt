@@ -25,9 +25,59 @@ set(HEADERS
     src/ast/func_call.hpp
 )
 
-# Main executable
+# Console executable
 add_executable(calc ${CORE_SOURCES} src/main.cpp ${HEADERS})
 target_include_directories(calc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# Qt GUI version
+option(BUILD_GUI "Build GUI version with Qt" ON)
+if(BUILD_GUI)
+    # Find Qt5
+    find_package(Qt5 COMPONENTS Widgets QUIET)
+    
+    if(Qt5_FOUND)
+        message(STATUS "Qt5 found, building GUI version")
+        
+        # Enable Qt features
+        set(CMAKE_AUTOMOC ON)
+        set(CMAKE_AUTORCC ON)
+        set(CMAKE_AUTOUIC ON)
+        
+        # GUI sources
+        set(GUI_SOURCES
+            src/gui/MainWindow.cpp
+            src/gui/CalculatorWidget.cpp
+            src/gui/CalculatorButton.cpp
+        )
+        
+        set(GUI_HEADERS
+            src/gui/MainWindow.hpp
+            src/gui/CalculatorWidget.hpp
+            src/gui/CalculatorButton.hpp
+        )
+        
+        # GUI executable
+        add_executable(calc-gui 
+            ${CORE_SOURCES} 
+            ${GUI_SOURCES}
+            src/main_gui.cpp
+            ${HEADERS}
+            ${GUI_HEADERS}
+        )
+        
+        target_include_directories(calc-gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(calc-gui Qt5::Widgets)
+        
+        # Copy styles.qss to build directory
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/styles.qss
+            ${CMAKE_CURRENT_BINARY_DIR}/styles.qss
+            COPYONLY
+        )
+    else()
+        message(WARNING "Qt5 not found, GUI version will not be built")
+    endif()
+endif()
 
 # Tests
 option(BUILD_TESTS "Build tests" ON)
