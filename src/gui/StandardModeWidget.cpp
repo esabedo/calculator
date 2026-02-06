@@ -1,5 +1,12 @@
 #include "StandardModeWidget.hpp"
 #include <QVBoxLayout>
+#include <QApplication>
+#include <sstream>
+#include <iomanip>
+#include "../lexer.hpp"
+#include "../parser.hpp"
+#include "../evaluator.hpp"
+#include "../error.hpp"
 
 namespace calc {
 
@@ -13,17 +20,41 @@ void StandardModeWidget::setupUI() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(10, 10, 10, 10);
     
+    // Контейнер дисплея
+    auto* displayContainer = new QWidget(this);
+    auto* displayLayout = new QVBoxLayout(displayContainer);
+    displayLayout->setContentsMargins(0, 0, 0, 0);
+    displayLayout->setSpacing(0);
+    
     // Дисплей
     display_ = new QLineEdit(this);
-    display_->setReadOnly(true);
+    display_->setReadOnly(false); // Разрешить ввод
     display_->setAlignment(Qt::AlignRight);
-    display_->setMinimumHeight(80);
+    display_->setMinimumHeight(60); // Чуть меньше, чтобы место для превью было
     display_->setPlaceholderText("0");
     QFont displayFont = display_->font();
-    displayFont.setPointSize(32);
+    displayFont.setPointSize(24);
     displayFont.setBold(true);
     display_->setFont(displayFont);
-    mainLayout->addWidget(display_);
+    
+    connect(display_, &QLineEdit::textChanged, this, &StandardModeWidget::onDisplayTextChanged);
+    connect(display_, &QLineEdit::returnPressed, this, &StandardModeWidget::onEqualsClicked);
+    
+    displayLayout->addWidget(display_);
+    
+    // Превью результата
+    previewLabel_ = new QLabel("", this);
+    previewLabel_->setAlignment(Qt::AlignRight);
+    previewLabel_->setObjectName("previewLabel");
+    previewLabel_->setFixedHeight(30);
+    QFont previewFont = previewLabel_->font();
+    previewFont.setPointSize(12);
+    previewLabel_->setFont(previewFont);
+    previewLabel_->setStyleSheet("color: #888888;"); // Серый цвет по умолчанию
+    
+    displayLayout->addWidget(previewLabel_);
+    
+    mainLayout->addWidget(displayContainer);
     
     // Сетка кнопок
     auto* buttonGrid = new QWidget(this);
@@ -128,11 +159,13 @@ void StandardModeWidget::onButtonClicked() {
     
     QString value = btn->value();
     display_->setText(display_->text() + value);
+    display_->setFocus();
 }
 
 void StandardModeWidget::onClearClicked() {
     display_->clear();
     display_->setPlaceholderText("0");
+    previewLabel_->clear();
 }
 
 void StandardModeWidget::onClearEntryClicked() {
@@ -166,6 +199,53 @@ void StandardModeWidget::onBackspaceClicked() {
 
 void StandardModeWidget::onEqualsClicked() {
     emit evaluateRequested();
+    previewLabel_->clear();
+}
+
+void StandardModeWidget::onDisplayTextChanged(const QString& text) {
+    calculatePreview(text);
+}
+
+void StandardModeWidget::calculatePreview(const QString& text) {
+    if (text.isEmpty()) {
+        previewLabel_->clear();
+        return;
+    }
+    
+    try {
+        Lexer lexer(text.toStdString());
+        auto tokens = lexer.tokenize();
+        Parser parser(tokens);
+        auto ast = parser.parse();
+        Evaluator evaluator;
+        double result = evaluator.evaluate(ast);
+        
+        // Форматируем результат
+        std::stringstream ss;
+        ss << std::defaultfloat << result;
+        previewLabel_->setText(QString::fromStdString(ss.str()));
+    } catch (...) {
+        // Если ошибка парсинга или вычисления, просто не показываем превью
+        // или очищаем его, если оно было
+        // previewLabel_->clear(); // Можно не очищать, чтобы видеть последний валидный результат, но калькулятор Windows очищает или не показывает
+        previewLabel_->clear();
+    }
+}
+
+void StandardModeWidget::keyPressEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        onEqualsClicked();
+        return;
+    }
+    
+    // Если фокус не на дисплее, перенаправляем ввод в дисплей
+    if (display_ && !display_->hasFocus()) {
+        display_->setFocus();
+        QApplication::sendEvent(display_, event);
+        return;
+    }
+    
+    QWidget::keyPressEvent(event);
 }
 
 } // namespace calc

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QWidget>
 #include <QLineEdit>
 #include <QGridLayout>
+#include <QLabel>
+#include <QKeyEvent>
 #include "CalculatorMode.hpp"
 #include "CalculatorButton.hpp"
 
@@ -22,6 +23,11 @@ public:
      */
     QLineEdit* display() const { return display_; }
 
+    /**
+     * @brief Обработка нажатий клавиш
+     */
+    void keyPressEvent(QKeyEvent* event) override;
+
 signals:
     void evaluateRequested();
 
@@ -31,12 +37,16 @@ protected slots:
     void onClearEntryClicked();
     void onBackspaceClicked();
     void onEqualsClicked();
+    void onDisplayTextChanged(const QString& text);
+
+protected:
+    QLineEdit* display_;
+    QLabel* previewLabel_;
 
 private:
     void setupUI();
     void createButtons();
-    
-    QLineEdit* display_;
+    void calculatePreview(const QString& text);
 };
 
 } // namespace calc
