@@ -1,6 +1,8 @@
 #include "StandardModeWidget.hpp"
 #include <QVBoxLayout>
 #include <QApplication>
+#include <QRegularExpressionValidator>
+#include <QRegularExpression>
 #include <sstream>
 #include <iomanip>
 #include "../lexer.hpp"
@@ -36,6 +38,10 @@ void StandardModeWidget::setupUI() {
     displayFont.setPointSize(24);
     displayFont.setBold(true);
     display_->setFont(displayFont);
+    
+    // Валидатор для разрешения только математических символов
+    QRegularExpression rx("[0-9+\\-*/%^().,eE\\sA-Za-z]+");
+    display_->setValidator(new QRegularExpressionValidator(rx, this));
     
     connect(display_, &QLineEdit::textChanged, this, &StandardModeWidget::onDisplayTextChanged);
     connect(display_, &QLineEdit::returnPressed, this, &StandardModeWidget::onEqualsClicked);

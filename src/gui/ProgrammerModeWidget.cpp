@@ -4,6 +4,7 @@
 #include <QButtonGroup>
 #include <QApplication>
 #include <QKeyEvent>
+#include <QRegularExpressionValidator>
 
 namespace calc {
 
@@ -30,6 +31,11 @@ void ProgrammerModeWidget::setupUI() {
     displayFont.setBold(true);
     display_->setFont(displayFont);
     display_->setReadOnly(false); // Разрешить ввод с клавиатуры
+    
+    // Начальный валидатор для Decimal
+    QRegularExpression rx("[0-9+\\-*/%^().,\\s&|^~<>]+");
+    display_->setValidator(new QRegularExpressionValidator(rx, this));
+    
     connect(display_, &QLineEdit::textChanged, this, &ProgrammerModeWidget::onDisplayTextChanged);
     connect(display_, &QLineEdit::returnPressed, this, &ProgrammerModeWidget::onEqualsClicked);
     mainLayout->addWidget(display_);
@@ -253,6 +259,17 @@ void ProgrammerModeWidget::onEqualsClicked() {
 void ProgrammerModeWidget::onBaseChanged(NumberBase base) {
     currentBase_ = base;
     updateButtonStates();
+    
+    // Обновить валидатор
+    QString pattern;
+    switch (base) {
+        case NumberBase::Binary: pattern = "[0-1+\\-*/%^().,\\s&|^~<>]+"; break;
+        case NumberBase::Octal: pattern = "[0-7+\\-*/%^().,\\s&|^~<>]+"; break;
+        case NumberBase::Decimal: pattern = "[0-9+\\-*/%^().,\\s&|^~<>]+"; break;
+        case NumberBase::Hexadecimal: pattern = "[0-9A-Fa-f+\\-*/%^().,\\s&|^~<>]+"; break;
+    }
+    QRegularExpression rx(pattern);
+    display_->setValidator(new QRegularExpressionValidator(rx, this));
     
     // Конвертировать текущее значение в новую систему
     if (!display_->text().isEmpty()) {
