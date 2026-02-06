@@ -41,6 +41,7 @@ int Parser::getPrecedence(TokenType type) {
             return 1;
         case TokenType::Multiply:
         case TokenType::Divide:
+        case TokenType::Modulo:
             return 2;
         case TokenType::Power:
             return 3;
@@ -79,12 +80,22 @@ std::unique_ptr<Node> Parser::parseExpression() {
 std::unique_ptr<Node> Parser::parseTerm() {
     auto left = parsePower();
     
-    while (current().type == TokenType::Multiply || current().type == TokenType::Divide) {
+    while (current().type == TokenType::Multiply || 
+           current().type == TokenType::Divide || 
+           current().type == TokenType::Modulo) {
         TokenType op = current().type;
         advance();
         auto right = parsePower();
         
-        BinaryOp binOp = (op == TokenType::Multiply) ? BinaryOp::Multiply : BinaryOp::Divide;
+        BinaryOp binOp;
+        if (op == TokenType::Multiply) {
+            binOp = BinaryOp::Multiply;
+        } else if (op == TokenType::Divide) {
+            binOp = BinaryOp::Divide;
+        } else {
+            binOp = BinaryOp::Modulo;
+        }
+        
         left = std::make_unique<BinaryOpNode>(binOp, std::move(left), std::move(right));
     }
     

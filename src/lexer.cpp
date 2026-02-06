@@ -50,6 +50,13 @@ Token Lexer::parseIdentifier() {
         id += get();
     }
     
+    // Проверка на математические константы
+    if (id == "pi" || id == "PI") {
+        return Token(TokenType::Number, 3.14159265358979323846);
+    } else if (id == "e" || id == "E") {
+        return Token(TokenType::Number, 2.71828182845904523536);
+    }
+    
     return Token(TokenType::Identifier, id);
 }
 
@@ -86,6 +93,10 @@ std::vector<Token> Lexer::tokenize() {
             case '/':
                 get();
                 tokens.emplace_back(TokenType::Divide);
+                break;
+            case '%':
+                get();
+                tokens.emplace_back(TokenType::Modulo);
                 break;
             case '^':
                 get();

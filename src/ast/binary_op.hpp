@@ -12,6 +12,7 @@ enum class BinaryOp {
     Subtract,
     Multiply,
     Divide,
+    Modulo,
     Power
 };
 
@@ -33,9 +34,14 @@ public:
                 return left_val * right_val;
             case BinaryOp::Divide:
                 if (right_val == 0.0) {
-                    throw EvalError("Division by zero");
+                    throw EvalError("Деление на ноль");
                 }
                 return left_val / right_val;
+            case BinaryOp::Modulo:
+                if (right_val == 0.0) {
+                    throw EvalError("Деление на ноль при взятии остатка");
+                }
+                return std::fmod(left_val, right_val);
             case BinaryOp::Power:
                 return std::pow(left_val, right_val);
         }

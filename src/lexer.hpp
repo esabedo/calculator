@@ -15,6 +15,7 @@ enum class TokenType {
     Minus,
     Multiply,
     Divide,
+    Modulo,
     Power,
     LParen,
     RParen,
