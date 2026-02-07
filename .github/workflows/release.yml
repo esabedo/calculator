@@ -47,7 +47,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y qt5-default libqt5widgets5 qtbase5-dev
+        sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 
     - name: Install Qt (macOS)
       if: runner.os == 'macOS'
