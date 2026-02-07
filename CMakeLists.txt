@@ -98,6 +98,9 @@ endif()
 # Tests
 option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)
+    # Force GoogleTest to use shared CRT on Windows (fixes MSVC linking issues)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    
     find_package(GTest QUIET)
     if(NOT GTest_FOUND)
         include(FetchContent)
