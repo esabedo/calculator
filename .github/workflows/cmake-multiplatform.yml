@@ -79,7 +79,7 @@ jobs:
       with:
         name: calculator-linux-${{ matrix.build_type }}
         path: |
-          ${{ steps.strings.outputs.build-output-dir }}/calc-cli
+          ${{ steps.strings.outputs.build-output-dir }}/calc
           ${{ steps.strings.outputs.build-output-dir }}/calc-gui
           ${{ steps.strings.outputs.build-output-dir }}/styles_*.qss
 
@@ -89,7 +89,7 @@ jobs:
       with:
         name: calculator-macos-${{ matrix.build_type }}
         path: |
-          ${{ steps.strings.outputs.build-output-dir }}/calc-cli
+          ${{ steps.strings.outputs.build-output-dir }}/calc
           ${{ steps.strings.outputs.build-output-dir }}/calc-gui
           ${{ steps.strings.outputs.build-output-dir }}/styles_*.qss
 
@@ -99,6 +99,6 @@ jobs:
       with:
         name: calculator-windows-${{ matrix.build_type }}
         path: |
-          ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/calc-cli.exe
+          ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/calc.exe
           ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/calc-gui.exe
           ${{ steps.strings.outputs.build-output-dir }}/styles_*.qss
