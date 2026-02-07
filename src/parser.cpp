@@ -4,9 +4,16 @@
 namespace calc {
 
 Parser::Parser(std::vector<Token> tokens) 
-    : tokens_(std::move(tokens)), pos_(0) {}
+    : tokens_(std::move(tokens)), pos_(0) {
+    if (tokens_.empty()) {
+        throw ParseError("Empty token stream");
+    }
+}
 
 Token& Parser::current() {
+    if (tokens_.empty()) {
+        throw ParseError("Empty token stream");
+    }
     if (pos_ >= tokens_.size()) {
         throw ParseError("Unexpected end of input");
     }
@@ -14,6 +21,12 @@ Token& Parser::current() {
 }
 
 Token& Parser::peek(size_t offset) {
+    if (tokens_.empty()) {
+        throw ParseError("Empty token stream");
+    }
+    if (offset > 1000) {  // Защита от слишком большого смещения
+        throw ParseError("Peek offset too large");
+    }
     if (pos_ + offset >= tokens_.size()) {
         throw ParseError("Unexpected end of input");
     }
@@ -27,6 +40,9 @@ void Parser::advance() {
 }
 
 bool Parser::match(TokenType type) {
+    if (pos_ >= tokens_.size()) {
+        return false;
+    }
     if (current().type == type) {
         advance();
         return true;

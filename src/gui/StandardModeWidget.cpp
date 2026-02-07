@@ -236,78 +236,100 @@ void StandardModeWidget::calculatePreview(const QString& text) {
     }
 }
 
+namespace {
+    // Вспомогательная функция: пропустить пробелы справа
+    int skipSpacesRight(const QString& text, int pos) {
+        while (pos >= 0 && text[pos].isSpace()) {
+            pos--;
+        }
+        return pos;
+    }
+    
+    // Вспомогательная функция: проверка, является ли символ оператором
+    bool isOperator(QChar c) {
+        return QString("+-*/%^(").contains(c);
+    }
+    
+    // Вспомогательная функция: проверка на унарный минус
+    bool isUnaryMinus(const QString& text, int minusPos) {
+        if (minusPos < 0 || text[minusPos] != '-') {
+            return false;
+        }
+        
+        int prevPos = skipSpacesRight(text, minusPos - 1);
+        
+        // Унарный если в начале или после оператора
+        return prevPos < 0 || isOperator(text[prevPos]);
+    }
+    
+    // Вспомогательная функция: найти начало числа
+    int findNumberStart(const QString& text, int end) {
+        int start = end;
+        while (start >= 0 && (text[start].isDigit() || 
+                              text[start] == '.' || 
+                              text[start] == 'e' || 
+                              text[start] == 'E')) {
+            start--;
+        }
+        return start + 1;
+    }
+}
+
 void StandardModeWidget::onNegateClicked() {
     QString text = display_->text();
-    if (text.isEmpty()) return;
+    if (text.isEmpty()) {
+        return;
+    }
     
-    // Ищем последнее число, пропуская пробелы
-    int i = text.length() - 1;
-    while (i >= 0 && text[i].isSpace()) i--;
+    // Пропускаем пробелы в конце
+    int i = skipSpacesRight(text, text.length() - 1);
     
-    // Если в конце оператор или скобка '(', то добавляем "-".
-    if (i < 0) { display_->setText(text + "-"); return; }
+    // Пустая строка после пробелов
+    if (i < 0) {
+        display_->setText(text + "-");
+        return;
+    }
     
-    QChar c = text[i];
-    if (QString("+-*/%^(").contains(c)) {
-        // Проверяем, не стоит ли уже минус?
-        if (c == '-') {
-            // Если перед минусом оператор или начало строки, то удаляем его
-            int opPos = i; // позиция минуса
-            int prevPos = opPos - 1;
-            while (prevPos >= 0 && text[prevPos].isSpace()) prevPos--;
-            
-            bool isUnary = false;
-            if (prevPos < 0) isUnary = true;
-            else if (QString("+-*/%^(").contains(text[prevPos])) isUnary = true;
-            
-            if (isUnary) {
-                text.remove(opPos, 1);
-                display_->setText(text);
-                return;
-            }
+    QChar lastChar = text[i];
+    
+    // Если последний символ - оператор
+    if (isOperator(lastChar)) {
+        if (lastChar == '-' && isUnaryMinus(text, i)) {
+            // Удаляем унарный минус
+            text.remove(i, 1);
+        } else {
+            // Добавляем минус после оператора
+            text.insert(i + 1, "-");
         }
-        // Иначе вставляем минус
-        text.insert(i + 1, "-");
         display_->setText(text);
         return;
     }
     
-    if (c == ')') {
-        // С выражениями в скобках сложно, оставим как есть или просто добавим " * -1"
-        // Для простоты, пока ничего не делаем или (опционально) добавляем "* -1"
-        return; 
+    // Если последний символ - закрывающая скобка
+    if (lastChar == ')') {
+        // Для выражений в скобках не меняем знак
+        // (можно добавить " * -1", но это усложняет логику)
+        return;
     }
     
-    // Значит это цифра или точка (или e). Ищем начало числа.
-    int end = i;
-    int start = end;
-    while (start >= 0 && (text[start].isDigit() || text[start] == '.' || text[start] == 'e' || text[start] == 'E')) {
-        start--;
-    }
-    start++; 
+    // Последний символ - часть числа
+    // Находим начало числа
+    int numberStart = findNumberStart(text, i);
     
-    // Проверяем префикс
-    int prefixPos = start - 1;
-    while (prefixPos >= 0 && text[prefixPos].isSpace()) prefixPos--;
+    // Проверяем, есть ли минус перед числом
+    int prefixPos = skipSpacesRight(text, numberStart - 1);
     
     if (prefixPos >= 0 && text[prefixPos] == '-') {
-         // Проверяем на унарность минуса
-         int prevOpPos = prefixPos - 1;
-         while (prevOpPos >= 0 && text[prevOpPos].isSpace()) prevOpPos--;
-         
-         bool isUnary = false;
-         if (prevOpPos < 0) isUnary = true;
-         else if (QString("+-*/%^(").contains(text[prevOpPos])) isUnary = true;
-         
-         if (isUnary) {
-             text.remove(prefixPos, 1);
-             display_->setText(text);
-             return;
-         }
+        if (isUnaryMinus(text, prefixPos)) {
+            // Удаляем унарный минус
+            text.remove(prefixPos, 1);
+            display_->setText(text);
+            return;
+        }
     }
     
     // Вставляем минус перед числом
-    text.insert(start, "-");
+    text.insert(numberStart, "-");
     display_->setText(text);
 }
 

@@ -1,10 +1,16 @@
 #include "lexer.hpp"
 #include "error.hpp"
 #include <cctype>
+#include <cmath>
 
 namespace calc {
 
-Lexer::Lexer(std::string input) : input_(std::move(input)), pos_(0) {}
+Lexer::Lexer(std::string input) : input_(std::move(input)), pos_(0) {
+    // Защита от слишком длинных входных строк
+    if (input_.size() > 10000) {
+        throw ParseError("Input string too long (max 10000 characters)");
+    }
+}
 
 char Lexer::peek() const {
     if (pos_ >= input_.size()) return '\0';
@@ -25,29 +31,82 @@ void Lexer::skipWhitespace() {
 Token Lexer::parseNumber() {
     std::string numStr;
     bool hasDot = false;
+    bool hasE = false;
     
-    while (std::isdigit(static_cast<unsigned char>(peek())) || peek() == '.') {
-        if (peek() == '.') {
-            if (hasDot) break;
+    // Защита от слишком длинных чисел
+    constexpr size_t MAX_NUMBER_LENGTH = 100;
+    
+    while (pos_ < input_.size()) {
+        char c = peek();
+        
+        if (std::isdigit(static_cast<unsigned char>(c))) {
+            numStr += get();
+        } else if (c == '.') {
+            if (hasDot || hasE) break;  // Только одна точка и не после E
             hasDot = true;
+            numStr += get();
+        } else if (c == 'e' || c == 'E') {
+            if (hasE) break;  // Только один экспоненциальный символ
+            hasE = true;
+            numStr += get();
+            // Проверка на знак после E
+            if (peek() == '+' || peek() == '-') {
+                numStr += get();
+            }
+        } else {
+            break;
         }
-        numStr += get();
+        
+        if (numStr.size() > MAX_NUMBER_LENGTH) {
+            throw ParseError("Number too long (max 100 characters)");
+        }
     }
     
-    if (numStr.empty() || numStr == ".") {
+    if (numStr.empty() || numStr == "." || numStr == "e" || numStr == "E") {
         throw ParseError("Invalid number format");
     }
     
-    return Token(TokenType::Number, std::stod(numStr));
+    // Проверка на корректное окончание
+    char last = numStr.back();
+    if (last == '.' || last == 'e' || last == 'E' || last == '+' || last == '-') {
+        throw ParseError("Invalid number format: incomplete");
+    }
+    
+    try {
+        double value = std::stod(numStr);
+        
+        // Проверка на переполнение
+        if (std::isinf(value)) {
+            throw ParseError("Number overflow: value too large");
+        }
+        if (std::isnan(value)) {
+            throw ParseError("Invalid number: NaN");
+        }
+        
+        return Token(TokenType::Number, value);
+    } catch (const std::out_of_range&) {
+        throw ParseError("Number out of range");
+    } catch (const std::invalid_argument&) {
+        throw ParseError("Invalid number format");
+    }
 }
 
 Token Lexer::parseIdentifier() {
     std::string id;
+    constexpr size_t MAX_IDENTIFIER_LENGTH = 100;
     
     while (std::isalpha(static_cast<unsigned char>(peek())) || 
            std::isdigit(static_cast<unsigned char>(peek())) || 
            peek() == '_') {
         id += get();
+        
+        if (id.size() > MAX_IDENTIFIER_LENGTH) {
+            throw ParseError("Identifier too long (max 100 characters)");
+        }
+    }
+    
+    if (id.empty()) {
+        throw ParseError("Empty identifier");
     }
     
     // Проверка на математические константы
