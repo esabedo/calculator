@@ -117,8 +117,8 @@ if(BUILD_TESTS)
     include(GoogleTest)
     gtest_discover_tests(calc_tests)
     
-    # Автоматический запуск тестов после сборки
-add_custom_target(run_tests ALL
+    # Запуск тестов (вручную через 'make run_tests' или 'ctest')
+add_custom_target(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
     DEPENDS calc_tests
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
