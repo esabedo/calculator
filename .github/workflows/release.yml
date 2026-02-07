@@ -77,7 +77,8 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         mkdir -p release/calculator
-        cp build/calc-cli build/calc-gui build/styles_*.qss release/calculator/
+        cp build/calc-cli build/calc-gui release/calculator/ || true
+        cp build/*.qss release/calculator/ || true
         cd release
         tar -czf ${{ matrix.asset_name }} calculator
 
@@ -85,7 +86,8 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         mkdir -p release/calculator
-        cp build/calc-cli build/calc-gui build/styles_*.qss release/calculator/
+        cp build/calc-cli build/calc-gui release/calculator/ || true
+        cp build/*.qss release/calculator/ || true
         cd release
         tar -czf ${{ matrix.asset_name }} calculator
 
@@ -93,9 +95,9 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         mkdir release\calculator
-        copy build\Release\calc-cli.exe release\calculator\
-        copy build\Release\calc-gui.exe release\calculator\
-        copy build\styles_*.qss release\calculator\
+        copy build\Release\calc-cli.exe release\calculator\ 2>nul || echo "calc-cli.exe not found"
+        copy build\Release\calc-gui.exe release\calculator\ 2>nul || echo "calc-gui.exe not found"
+        copy build\*.qss release\calculator\ 2>nul || echo "qss files not found"
         cd release
         powershell Compress-Archive -Path calculator -DestinationPath ${{ matrix.asset_name }}
 
